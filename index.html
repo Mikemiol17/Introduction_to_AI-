@@ -1,1 +1,1695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introduction to Artificial Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,200;0,400;0,600;0,800;0,900;1,400&family=JetBrains+Mono:wght@300;400;600&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #020d1a;
+  --s1:      #040f1f;
+  --s2:      #061424;
+  --card:    #071829;
+  --border:  #0d2a44;
+  --cyan:    #00d4ff;
+  --cyan2:   #00a8cc;
+  --gold:    #ffc947;
+  --gold2:   #e6a800;
+  --teal:    #00f5c4;
+  --violet:  #b87fff;
+  --red:     #ff5f6d;
+  --blue:    #4d9fff;
+  --white:   #e8f4ff;
+  --muted:   #1a3a5c;
+  --text:    #8bb8d4;
+  --dim:     #0d2035;
+}
+*{margin:0;padding:0;box-sizing:border-box}
 
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Exo 2',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* Neural network canvas background */
+#neural-bg{
+  position:fixed;inset:0;
+  pointer-events:none;z-index:0;
+  opacity:0.35;
+}
+
+/* ── HEADER ── */
+.hdr{
+  position:relative;z-index:10;
+  text-align:center;
+  padding:42px 24px 28px;
+  border-bottom:1px solid var(--border);
+  overflow:hidden;
+}
+.hdr::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.12) 0%, transparent 70%);
+  pointer-events:none;
+}
+.hdr .kicker{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.62rem;letter-spacing:.5em;
+  color:var(--cyan2);text-transform:uppercase;
+  margin-bottom:12px;
+}
+.hdr h1{
+  font-family:'Cinzel',serif;
+  font-size:clamp(1.6rem,5vw,3.2rem);
+  font-weight:900;
+  background:linear-gradient(135deg,var(--cyan) 0%,var(--white) 50%,var(--gold) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  letter-spacing:.08em;line-height:1.1;
+  filter:drop-shadow(0 0 30px rgba(0,212,255,0.3));
+}
+.hdr .sub{
+  font-size:.8rem;color:var(--text);
+  letter-spacing:.2em;margin-top:10px;
+  font-weight:400;
+}
+.hdr-stats{
+  display:flex;justify-content:center;gap:32px;
+  margin-top:16px;flex-wrap:wrap;
+}
+.hdr-stat{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;color:var(--muted);
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.hdr-stat span{color:var(--cyan);font-size:.85rem;font-weight:600;}
+
+/* ── TABS ── */
+.tabs{
+  position:sticky;top:0;z-index:100;
+  background:rgba(2,13,26,0.97);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  overflow-x:auto;scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab-row{display:flex;min-width:max-content;}
+.tab{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.62rem;letter-spacing:.1em;
+  padding:14px 20px;
+  background:none;border:none;
+  border-bottom:2px solid transparent;
+  color:var(--muted);cursor:pointer;
+  transition:all .2s;white-space:nowrap;
+  display:flex;align-items:center;gap:7px;
+}
+.tab:hover{color:var(--white);}
+.tab.on{color:var(--cyan);border-bottom-color:var(--cyan);}
+.tab .tnum{
+  width:18px;height:18px;border-radius:3px;
+  background:var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.58rem;color:var(--muted);
+}
+.tab.on .tnum{background:var(--cyan);color:var(--bg);}
+
+/* ── PANELS ── */
+.panel{display:none;position:relative;z-index:1;}
+.panel.on{display:block;}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1300px;margin:0 auto;padding:28px 20px 56px;}
+.two-col{display:grid;grid-template-columns:1fr 330px;gap:22px;align-items:start;}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.two-even{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:960px){
+  .two-col{grid-template-columns:1fr;}
+  .three-col{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:560px){.three-col,.two-even{grid-template-columns:1fr;}}
+
+/* ── SECTION HEAD ── */
+.sec{margin-bottom:22px;}
+.sec .tag{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.4em;color:var(--cyan2);text-transform:uppercase;margin-bottom:6px;}
+.sec h2{font-family:'Cinzel',serif;font-size:clamp(1.1rem,2.5vw,1.7rem);font-weight:700;color:var(--white);margin-bottom:8px;letter-spacing:.04em;}
+.sec p{font-size:.8rem;color:var(--text);line-height:1.75;max-width:720px;}
+
+/* ── BOX ── */
+.box{background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:18px;overflow:hidden;box-shadow:0 4px 30px rgba(0,0,0,0.4);}
+.box-title{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.28em;padding:10px 16px;border-bottom:1px solid var(--border);color:var(--cyan2);text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.box-title .pip{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:pipblink 2s ease infinite;}
+@keyframes pipblink{0%,100%{opacity:1}50%{opacity:.4}}
+.box svg{display:block;width:100%;height:auto;}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:14px 16px;border-left:3px solid var(--cl,var(--cyan));transition:all .2s;}
+.card:hover{background:var(--s2);transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,0,0,0.4);}
+.card h4{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cl,var(--cyan));margin-bottom:7px;}
+.card p{font-size:.76rem;color:var(--text);line-height:1.7;}
+.card code{color:var(--cyan);background:rgba(0,212,255,.08);padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:.75em;}
+.card-stack{display:flex;flex-direction:column;gap:11px;}
+.badge{display:inline-block;margin-top:6px;background:rgba(0,0,0,.4);border:1px solid var(--cl,var(--cyan));border-radius:3px;padding:2px 9px;font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--cl,var(--cyan));letter-spacing:.08em;}
+
+/* ── TIMELINE ── */
+.timeline{position:relative;padding-left:28px;}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:1px;background:linear-gradient(180deg,var(--cyan),var(--violet),var(--gold));opacity:.4;}
+.tl-item{position:relative;margin-bottom:20px;animation:fadeup .4s ease both;}
+.tl-item::before{content:'';position:absolute;left:-23px;top:6px;width:9px;height:9px;border-radius:50%;background:var(--dot,var(--cyan));box-shadow:0 0 10px var(--dot,var(--cyan));border:1px solid var(--bg);}
+.tl-year{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--dot,var(--cyan));letter-spacing:.15em;margin-bottom:3px;}
+.tl-title{font-weight:800;color:var(--white);font-size:.88rem;margin-bottom:4px;}
+.tl-body{font-size:.74rem;color:var(--text);line-height:1.65;}
+
+/* ── PERSON CARD ── */
+.person-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:8px;transition:all .2s;}
+.person-card:hover{border-color:var(--cyan2);box-shadow:0 0 20px rgba(0,212,255,0.1);}
+.person-avatar{width:52px;height:52px;border-radius:50%;background:var(--dim);border:2px solid var(--cl,var(--cyan));display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+.person-name{font-weight:800;color:var(--white);font-size:.9rem;}
+.person-dates{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.1em;}
+.person-role{font-size:.68rem;color:var(--cl,var(--cyan));font-weight:600;letter-spacing:.08em;}
+.person-desc{font-size:.72rem;color:var(--text);line-height:1.6;}
+.person-contrib{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.12);border-radius:3px;padding:6px 10px;font-size:.68rem;color:var(--cyan2);line-height:1.5;}
+
+/* ── APP CARD ── */
+.app-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:16px;transition:all .2s;cursor:default;position:relative;overflow:hidden;}
+.app-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cl,var(--cyan)),transparent);}
+.app-card:hover{background:var(--s2);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+.app-icon{font-size:2rem;margin-bottom:10px;display:block;}
+.app-name{font-weight:800;color:var(--white);font-size:.9rem;margin-bottom:4px;}
+.app-cat{font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:.2em;color:var(--cl,var(--cyan));text-transform:uppercase;margin-bottom:8px;}
+.app-desc{font-size:.72rem;color:var(--text);line-height:1.65;}
+.app-fact{background:rgba(0,0,0,.3);border-radius:3px;padding:5px 9px;font-size:.65rem;color:var(--gold);margin-top:8px;line-height:1.5;}
+
+/* ── SEARCH VIZ ── */
+.search-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:14px;}
+.s-node{
+  border:1px solid var(--border);border-radius:4px;
+  padding:8px 6px;text-align:center;
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;
+  transition:all .3s;cursor:pointer;
+  position:relative;
+}
+.s-node:hover,.s-node.visited{background:rgba(0,212,255,.1);border-color:var(--cyan);}
+.s-node.frontier{background:rgba(255,201,71,.1);border-color:var(--gold);}
+.s-node.path{background:rgba(0,245,196,.15);border-color:var(--teal);color:var(--teal);}
+.s-node.start{background:rgba(0,212,255,.15);border-color:var(--cyan);color:var(--cyan);}
+.s-node.goal{background:rgba(255,95,109,.15);border-color:var(--red);color:var(--red);}
+.s-node .cost{font-size:.55rem;color:var(--muted);display:block;}
+
+/* ── AGENT VIZ ── */
+.agent-loop{
+  display:flex;align-items:center;justify-content:center;
+  gap:0;flex-wrap:wrap;padding:16px;
+}
+.a-box{
+  background:var(--dim);border:1px solid var(--border);
+  border-radius:5px;padding:10px 16px;
+  text-align:center;min-width:120px;
+}
+.a-box .ab-label{font-size:.6rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:4px;font-family:'JetBrains Mono',monospace;}
+.a-box .ab-name{font-weight:700;color:var(--white);font-size:.85rem;}
+.a-arrow{
+  font-size:1.2rem;color:var(--cyan2);padding:0 6px;
+  animation:arrowPulse 1.5s ease infinite;
+}
+@keyframes arrowPulse{0%,100%{opacity:.4;transform:scaleX(1)}50%{opacity:1;transform:scaleX(1.2)}}
+
+/* ── MINIMAX TREE ── */
+.mm-tree{padding:14px;overflow-x:auto;}
+
+/* ── COMPARE TABLE ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:.75rem;}
+.cmp-table th{background:var(--dim);color:var(--cyan2);padding:9px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.15em;border-bottom:1px solid var(--border);}
+.cmp-table td{padding:9px 14px;border-bottom:1px solid rgba(13,42,68,.5);vertical-align:top;color:var(--text);font-size:.74rem;}
+.cmp-table tr:hover td{background:rgba(0,212,255,.03);}
+.cmp-table .hl{color:var(--cyan);font-weight:600;}
+.cmp-table .nat{color:var(--teal);}
+.cmp-table .art{color:var(--gold);}
+
+/* ── ML VISUAL ── */
+.nn-layers{display:flex;align-items:center;justify-content:center;gap:0;padding:20px;overflow-x:auto;}
+.nn-layer{display:flex;flex-direction:column;align-items:center;gap:6px;padding:0 12px;}
+.nn-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;}
+.nn-node{width:32px;height:32px;border-radius:50%;border:2px solid var(--cl,var(--cyan));background:rgba(0,212,255,.08);display:flex;align-items:center;justify-content:center;font-size:.6rem;color:var(--cl,var(--cyan));transition:all .3s;}
+.nn-node:hover{background:rgba(0,212,255,.2);box-shadow:0 0 14px rgba(0,212,255,.3);}
+.nn-connector{width:40px;height:2px;background:linear-gradient(90deg,transparent,var(--border),transparent);position:relative;}
+
+/* ── TYPEWRITER EFFECT ── */
+.typewriter{overflow:hidden;border-right:2px solid var(--cyan);white-space:nowrap;animation:typing 3s steps(40) 0.5s both, cursor-blink .75s step-end infinite;}
+@keyframes typing{from{width:0}to{width:100%}}
+@keyframes cursor-blink{0%,100%{border-color:var(--cyan)}50%{border-color:transparent}}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes data-stream{0%{stroke-dashoffset:0}100%{stroke-dashoffset:-400}}
+@keyframes node-pulse{0%,100%{r:6;opacity:.8}50%{r:9;opacity:1}}
+@keyframes glow-pulse{0%,100%{filter:drop-shadow(0 0 4px var(--cyan))}50%{filter:drop-shadow(0 0 16px var(--cyan))}}
+
+.panel.on .box{animation:fadeup .35s ease both;}
+.panel.on .card{animation:fadeup .35s ease both;}
+.panel.on .tl-item{animation-delay:calc(var(--i,0)*.08s);}
+
+/* ── PROGRESS METER ── */
+.progress-meter{height:4px;border-radius:2px;background:var(--border);margin-top:8px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--cyan),var(--teal));transition:width .8s ease;}
+</style>
+</head>
+<body>
+
+<canvas id="neural-bg"></canvas>
+
+<header class="hdr">
+  <div class="kicker">Complete Visual Reference Guide</div>
+  <h1>Artificial Intelligence</h1>
+  <p class="sub">From Concept to Reality — A Comprehensive Introduction</p>
+  <div class="hdr-stats">
+    <div class="hdr-stat"><span>1950</span>Alan Turing's Test</div>
+    <div class="hdr-stat"><span>70+</span>Years of Progress</div>
+    <div class="hdr-stat"><span>4</span>Types of AI</div>
+    <div class="hdr-stat"><span>∞</span>Applications</div>
+    <div class="hdr-stat"><span>AGI</span>The Goal</div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="tab-row">
+    <button class="tab on"  onclick="go('intro',this)"><span class="tnum">1</span>Introduction</button>
+    <button class="tab"     onclick="go('intel',this)"><span class="tnum">2</span>Intelligence</button>
+    <button class="tab"     onclick="go('history',this)"><span class="tnum">3</span>History</button>
+    <button class="tab"     onclick="go('inventors',this)"><span class="tnum">4</span>Inventors</button>
+    <button class="tab"     onclick="go('agents',this)"><span class="tnum">5</span>Agents</button>
+    <button class="tab"     onclick="go('ml',this)"><span class="tnum">6</span>ML & Neural Nets</button>
+    <button class="tab"     onclick="go('apps',this)"><span class="tnum">7</span>Applications</button>
+    <button class="tab"     onclick="go('search',this)"><span class="tnum">8</span>AI Search</button>
+    <button class="tab"     onclick="go('ethics',this)"><span class="tnum">9</span>Ethics & Future</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════
+  1 — INTRODUCTION
+══════════════════════════════ -->
+<div id="p-intro" class="panel on">
+<div class="wrap">
+  <div class="sec">
+    <div class="tag">Chapter 1 — Foundation</div>
+    <h2>What is Artificial Intelligence?</h2>
+    <p>Artificial Intelligence (AI) is the science and engineering of creating machines and software that can perform tasks which normally require <em>human intelligence</em> — reasoning, learning, problem-solving, perception, language understanding, and creative thinking. It is the broadest branch of computer science, sitting at the intersection of mathematics, neuroscience, philosophy, and engineering.</p>
+  </div>
+
+  <!-- Core definition diagram -->
+  <div class="box">
+    <div class="box-title"><div class="pip"></div>WHAT AI ENCOMPASSES — THE CORE DEFINITION</div>
+    <svg viewBox="0 0 860 340" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="g1"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="g2"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <radialGradient id="aiCore" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#00d4ff" stop-opacity=".2"/>
+          <stop offset="100%" stop-color="#020d1a" stop-opacity="0"/>
+        </radialGradient>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10z" fill="#00d4ff" opacity=".8"/>
+        </marker>
+      </defs>
+      <rect width="860" height="340" fill="#040f1f"/>
+
+      <!-- Central AI circle -->
+      <circle cx="430" cy="170" r="90" fill="url(#aiCore)" stroke="#00d4ff" stroke-width="2" filter="url(#g1)"/>
+      <circle cx="430" cy="170" r="65" fill="none" stroke="#00d4ff" stroke-width="1" opacity=".4" stroke-dasharray="4 4">
+        <animateTransform attributeName="transform" type="rotate" from="0 430 170" to="360 430 170" dur="20s" repeatCount="indefinite"/>
+      </circle>
+      <text x="430" y="162" text-anchor="middle" font-family="Cinzel,serif" font-size="18" font-weight="700" fill="#00d4ff" filter="url(#g1)">ARTIFICIAL</text>
+      <text x="430" y="182" text-anchor="middle" font-family="Cinzel,serif" font-size="18" font-weight="700" fill="#00d4ff">INTELLIGENCE</text>
+      <text x="430" y="200" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00a8cc">"machines that think"</text>
+
+      <!-- Satellite topics -->
+      <!-- Reasoning -->
+      <circle cx="185" cy="80" r="48" fill="rgba(0,212,255,.05)" stroke="rgba(0,212,255,.4)" stroke-width="1.5"/>
+      <text x="185" y="72" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="11" font-weight="700" fill="#00d4ff">REASONING</text>
+      <text x="185" y="86" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">Logic · Inference</text>
+      <text x="185" y="99" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">Deduction · Planning</text>
+      <line x1="230" y1="98" x2="350" y2="140" stroke="rgba(0,212,255,.3)" stroke-width="1.2" stroke-dasharray="3 3"/>
+
+      <!-- Learning -->
+      <circle cx="675" cy="80" r="48" fill="rgba(255,201,71,.04)" stroke="rgba(255,201,71,.4)" stroke-width="1.5"/>
+      <text x="675" y="72" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="11" font-weight="700" fill="#ffc947">LEARNING</text>
+      <text x="675" y="86" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">ML · Deep Learning</text>
+      <text x="675" y="99" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">Pattern Recognition</text>
+      <line x1="628" y1="98" x2="510" y2="140" stroke="rgba(255,201,71,.3)" stroke-width="1.2" stroke-dasharray="3 3"/>
+
+      <!-- Perception -->
+      <circle cx="120" cy="240" r="48" fill="rgba(0,245,196,.04)" stroke="rgba(0,245,196,.4)" stroke-width="1.5"/>
+      <text x="120" y="232" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="11" font-weight="700" fill="#00f5c4">PERCEPTION</text>
+      <text x="120" y="246" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">Vision · Speech</text>
+      <text x="120" y="259" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">Touch · Sensing</text>
+      <line x1="165" y1="222" x2="348" y2="195" stroke="rgba(0,245,196,.3)" stroke-width="1.2" stroke-dasharray="3 3"/>
+
+      <!-- Language -->
+      <circle cx="740" cy="240" r="48" fill="rgba(184,127,255,.04)" stroke="rgba(184,127,255,.4)" stroke-width="1.5"/>
+      <text x="740" y="232" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="11" font-weight="700" fill="#b87fff">LANGUAGE</text>
+      <text x="740" y="246" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">NLP · Translation</text>
+      <text x="740" y="259" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">Generation · Dialogue</text>
+      <line x1="694" y1="222" x2="512" y2="195" stroke="rgba(184,127,255,.3)" stroke-width="1.2" stroke-dasharray="3 3"/>
+
+      <!-- Planning -->
+      <circle cx="430" cy="300" r="38" fill="rgba(255,95,109,.04)" stroke="rgba(255,95,109,.35)" stroke-width="1.5"/>
+      <text x="430" y="296" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="11" font-weight="700" fill="#ff5f6d">PLANNING</text>
+      <text x="430" y="310" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">Strategy · Goals</text>
+      <line x1="430" y1="262" x2="430" y2="260" stroke="rgba(255,95,109,.3)" stroke-width="1.2" stroke-dasharray="3 3"/>
+
+      <!-- Animated pulses from center -->
+      <circle cx="430" cy="170" r="90" fill="none" stroke="#00d4ff" stroke-width="1" opacity="0">
+        <animate attributeName="r" values="90;160" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values=".5;0" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="430" cy="170" r="90" fill="none" stroke="#00d4ff" stroke-width="1" opacity="0">
+        <animate attributeName="r" values="90;160" dur="3s" begin="-1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values=".5;0" dur="3s" begin="-1.5s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  </div>
+
+  <!-- 4 types of AI -->
+  <div class="box">
+    <div class="box-title"><div class="pip"></div>THE 4 TYPES OF AI — FROM NARROW TO SUPERINTELLIGENT</div>
+    <svg viewBox="0 0 860 190" xmlns="http://www.w3.org/2000/svg">
+      <rect width="860" height="190" fill="#040f1f"/>
+      <!-- Power bar -->
+      <defs>
+        <linearGradient id="powerG" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#00d4ff"/>
+          <stop offset="33%" stop-color="#ffc947"/>
+          <stop offset="66%" stop-color="#b87fff"/>
+          <stop offset="100%" stop-color="#ff5f6d"/>
+        </linearGradient>
+      </defs>
+      <rect x="20" y="170" width="820" height="4" rx="2" fill="url(#powerG)" opacity=".4"/>
+      <text x="20" y="185" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">LESS CAPABLE</text>
+      <text x="840" y="185" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">MORE CAPABLE</text>
+
+      <!-- Type 1: ANI -->
+      <rect x="20" y="15" width="190" height="145" rx="5" fill="rgba(0,212,255,.04)" stroke="rgba(0,212,255,.3)" stroke-width="1.5"/>
+      <text x="115" y="36" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d4ff" letter-spacing="1">TYPE 1</text>
+      <text x="115" y="54" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="13" font-weight="800" fill="#00d4ff">NARROW AI</text>
+      <text x="115" y="68" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">(Weak AI / ANI)</text>
+      <text x="30" y="86" font-family="JetBrains Mono,monospace" font-size="8" fill="#0d4060">▸ ONE specific task</text>
+      <text x="30" y="100" font-family="JetBrains Mono,monospace" font-size="8" fill="#0d4060">▸ Siri, Alexa, GPT</text>
+      <text x="30" y="114" font-family="JetBrains Mono,monospace" font-size="8" fill="#0d4060">▸ Chess engines</text>
+      <text x="30" y="128" font-family="JetBrains Mono,monospace" font-size="8" fill="#0d4060">▸ Face recognition</text>
+      <text x="115" y="150" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00d4ff">EXISTS TODAY ✓</text>
+
+      <!-- Type 2: AGI -->
+      <rect x="225" y="15" width="190" height="145" rx="5" fill="rgba(255,201,71,.04)" stroke="rgba(255,201,71,.3)" stroke-width="1.5"/>
+      <text x="320" y="36" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#ffc947" letter-spacing="1">TYPE 2</text>
+      <text x="320" y="54" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="13" font-weight="800" fill="#ffc947">GENERAL AI</text>
+      <text x="320" y="68" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">(Strong AI / AGI)</text>
+      <text x="235" y="86" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b5000">▸ ANY cognitive task</text>
+      <text x="235" y="100" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b5000">▸ Human-level reason</text>
+      <text x="235" y="114" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b5000">▸ Transfer learning</text>
+      <text x="235" y="128" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b5000">▸ General problem-solve</text>
+      <text x="320" y="150" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947">~2030–2050 (estimated)</text>
+
+      <!-- Type 3: ASI -->
+      <rect x="430" y="15" width="190" height="145" rx="5" fill="rgba(184,127,255,.04)" stroke="rgba(184,127,255,.3)" stroke-width="1.5"/>
+      <text x="525" y="36" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#b87fff" letter-spacing="1">TYPE 3</text>
+      <text x="525" y="54" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="13" font-weight="800" fill="#b87fff">SUPER AI</text>
+      <text x="525" y="68" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">(ASI / Superintelligence)</text>
+      <text x="440" y="86" font-family="JetBrains Mono,monospace" font-size="8" fill="#4a2080">▸ Exceeds humans</text>
+      <text x="440" y="100" font-family="JetBrains Mono,monospace" font-size="8" fill="#4a2080">▸ All domains at once</text>
+      <text x="440" y="114" font-family="JetBrains Mono,monospace" font-size="8" fill="#4a2080">▸ Self-improvement</text>
+      <text x="440" y="128" font-family="JetBrains Mono,monospace" font-size="8" fill="#4a2080">▸ Unpredictable goals</text>
+      <text x="525" y="150" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#b87fff">Theoretical / Future</text>
+
+      <!-- Type 4: Reactive etc -->
+      <rect x="635" y="15" width="205" height="145" rx="5" fill="rgba(255,95,109,.04)" stroke="rgba(255,95,109,.3)" stroke-width="1.5"/>
+      <text x="737" y="36" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#ff5f6d" letter-spacing="1">ALSO CLASSIFIED BY</text>
+      <text x="737" y="54" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="11" font-weight="800" fill="#ff5f6d">MEMORY TYPE</text>
+      <text x="645" y="74" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b1a20">▸ Reactive (no memory)</text>
+      <text x="645" y="88" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b1a20">▸ Limited Memory (uses past)</text>
+      <text x="645" y="102" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b1a20">▸ Theory of Mind (future)</text>
+      <text x="645" y="116" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b1a20">▸ Self-aware (hypothetical)</text>
+      <text x="645" y="132" font-family="JetBrains Mono,monospace" font-size="8" fill="#ff5f6d">e.g. Deep Blue = Reactive</text>
+      <text x="645" y="146" font-family="JetBrains Mono,monospace" font-size="8" fill="#ff5f6d">Self-driving = Limited Mem</text>
+    </svg>
+  </div>
+
+  <div class="three-col">
+    <div class="card" style="--cl:var(--cyan)">
+      <h4>The Core Goal</h4>
+      <p>John McCarthy, who coined "Artificial Intelligence" in 1956, defined it as <code>"the science and engineering of making intelligent machines."</code> The core question: can we create machines that exhibit human-like cognition? Understanding this drives every AI breakthrough.</p>
+    </div>
+    <div class="card" style="--cl:var(--gold)">
+      <h4>Why AI Matters Now</h4>
+      <p>Three factors converged to supercharge AI: <code>Big Data</code> (trillions of training examples), <code>GPUs</code> (1000× faster training), and <code>Deep Learning</code> (algorithms that learn representations automatically). Together they created the AI revolution of the 2010s–2020s.</p>
+    </div>
+    <div class="card" style="--cl:var(--teal)">
+      <h4>AI vs ML vs DL</h4>
+      <p><code>AI</code> — broadest field: any technique making machines smart<br>
+      <code>ML</code> — AI subset: systems that learn from data<br>
+      <code>DL</code> — ML subset: learning via neural networks<br>
+      Think of it as nested circles: DL ⊂ ML ⊂ AI</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+  2 — INTELLIGENCE
+══════════════════════════════ -->
+<div id="p-intel" class="panel">
+<div class="wrap">
+  <div class="sec">
+    <div class="tag">Chapter 2 — Intelligence</div>
+    <h2>Intelligence: Natural vs Artificial</h2>
+    <p>What is intelligence? It's the ability to acquire knowledge, reason with it, learn from experience, and adapt to new situations. Natural intelligence emerges from billions of neurons. Artificial intelligence engineers these same capabilities from silicon and mathematics.</p>
+  </div>
+
+  <div class="box">
+    <div class="box-title"><div class="pip"></div>NATURAL vs ARTIFICIAL INTELLIGENCE — FULL COMPARISON</div>
+    <table class="cmp-table">
+      <tr>
+        <th>PROPERTY</th>
+        <th style="color:#00f5c4">🧠 NATURAL (Human)</th>
+        <th style="color:#ffc947">🤖 ARTIFICIAL (Machine)</th>
+      </tr>
+      <tr>
+        <td class="hl">Substrate</td>
+        <td class="nat">~86 billion neurons + synapses. Electrochemical signals at 1–100 m/s</td>
+        <td class="art">Transistors (MOSFET). Electronic signals at ~3×10⁸ m/s (near light speed)</td>
+      </tr>
+      <tr>
+        <td class="hl">Learning</td>
+        <td class="nat">Lifelong, from few examples, via emotion + reward. Synaptic plasticity (Hebbian learning)</td>
+        <td class="art">Millions of labelled examples + gradient descent. Catastrophic forgetting is a challenge</td>
+      </tr>
+      <tr>
+        <td class="hl">Speed</td>
+        <td class="nat">Conscious thought: slow (~200ms reactions). But massively parallel subconscious processing</td>
+        <td class="art">GPT-4 processes billions of parameters in milliseconds. Superhuman at specific arithmetic</td>
+      </tr>
+      <tr>
+        <td class="hl">Generalisation</td>
+        <td class="nat">Excellent — one experience generalises broadly across domains (common sense)</td>
+        <td class="art">Poor — models fail outside their training distribution. Each model is domain-specific</td>
+      </tr>
+      <tr>
+        <td class="hl">Energy</td>
+        <td class="nat">~20 watts (entire brain!). Extraordinarily efficient</td>
+        <td class="art">GPT-3 training: ~1,287 MWh. Inference: hundreds of watts per query</td>
+      </tr>
+      <tr>
+        <td class="hl">Creativity</td>
+        <td class="nat">Genuine novelty, insight, "aha!" moments, dreaming, metaphor</td>
+        <td class="art">Interpolation + recombination of training data. No verified true novelty yet</td>
+      </tr>
+      <tr>
+        <td class="hl">Emotion</td>
+        <td class="nat">Drives behaviour, learning, motivation. Limbic system + hormones</td>
+        <td class="art">None. Can simulate emotional language but no felt experience</td>
+      </tr>
+      <tr>
+        <td class="hl">Consciousness</td>
+        <td class="nat">Subjective experience (qualia). Still scientifically mysterious</td>
+        <td class="art">No evidence of subjective experience. The "hard problem" remains unsolved</td>
+      </tr>
+      <tr>
+        <td class="hl">Speed of learning</td>
+        <td class="nat">Years to master a domain. Childhood development 0–18 years</td>
+        <td class="art">AlphaGo Zero mastered Go in 3 days of self-play. AlphaFold solved protein folding overnight</td>
+      </tr>
+      <tr>
+        <td class="hl">Robustness</td>
+        <td class="nat">Handles noise, ambiguity, incomplete info naturally</td>
+        <td class="art">Brittle — adversarial examples fool AI with imperceptible pixel changes</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="box">
+    <div class="box-title"><div class="pip"></div>THE TURING TEST — CAN A MACHINE THINK?</div>
+    <svg viewBox="0 0 860 200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="860" height="200" fill="#040f1f"/>
+      <defs>
+        <marker id="ta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10z" fill="#00d4ff" opacity=".7"/>
+        </marker>
+      </defs>
+
+      <!-- Human judge -->
+      <rect x="20" y="60" width="130" height="80" rx="5" fill="rgba(0,245,196,.06)" stroke="rgba(0,245,196,.4)" stroke-width="1.5"/>
+      <text x="85" y="92" text-anchor="middle" font-size="22">👤</text>
+      <text x="85" y="112" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="11" font-weight="700" fill="#00f5c4">HUMAN JUDGE</text>
+      <text x="85" y="126" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#0d4060">text-only conversation</text>
+
+      <!-- Questions -->
+      <path d="M152,100 L230,100" fill="none" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#ta)">
+        <animate attributeName="stroke-dashoffset" values="0;-100" dur="2s" repeatCount="indefinite"/>
+      </path>
+      <text x="191" y="92" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#0d4060">QUESTIONS</text>
+
+      <!-- Partition -->
+      <rect x="234" y="20" width="8" height="160" rx="2" fill="var(--border)"/>
+      <text x="238" y="15" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">BLIND</text>
+
+      <!-- Room A: Human -->
+      <rect x="255" y="40" width="170" height="120" rx="5" fill="rgba(0,245,196,.04)" stroke="rgba(0,245,196,.3)" stroke-width="1.2"/>
+      <text x="340" y="70" text-anchor="middle" font-size="20">🧑</text>
+      <text x="340" y="92" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="12" font-weight="700" fill="#00f5c4">ROOM A: HUMAN</text>
+      <text x="340" y="108" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#0d4060">real person responding</text>
+      <text x="340" y="124" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#0d4060">naturally and truthfully</text>
+      <text x="340" y="143" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00f5c4">Judge should ID as human</text>
+
+      <!-- Room B: AI -->
+      <rect x="440" y="40" width="170" height="120" rx="5" fill="rgba(255,201,71,.04)" stroke="rgba(255,201,71,.3)" stroke-width="1.2"/>
+      <text x="525" y="70" text-anchor="middle" font-size="20">🤖</text>
+      <text x="525" y="92" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="12" font-weight="700" fill="#ffc947">ROOM B: AI</text>
+      <text x="525" y="108" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b5000">machine tries to</text>
+      <text x="525" y="124" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b5000">appear human</text>
+      <text x="525" y="143" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947">If judge can't tell → AI PASSES</text>
+
+      <!-- Results / Responses -->
+      <path d="M340,162 L238,170 L152,130" fill="none" stroke="#00f5c4" stroke-width="1.3" stroke-dasharray="5 3" marker-end="url(#ta)">
+        <animate attributeName="stroke-dashoffset" values="0;100" dur="2s" repeatCount="indefinite"/>
+      </path>
+      <path d="M525,162 L242,172 L152,132" fill="none" stroke="#ffc947" stroke-width="1.3" stroke-dasharray="5 3" marker-end="url(#ta)">
+        <animate attributeName="stroke-dashoffset" values="0;100" dur="2.3s" repeatCount="indefinite" begin="-0.5s"/>
+      </path>
+
+      <!-- Turing info -->
+      <rect x="640" y="30" width="205" height="140" rx="4" fill="rgba(0,0,0,.4)"/>
+      <text x="742" y="52" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="12" font-weight="800" fill="#00d4ff">Alan Turing (1950)</text>
+      <text x="650" y="72" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">"Computing Machinery and</text>
+      <text x="650" y="84" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c"> Intelligence" — proposes the</text>
+      <text x="650" y="96" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c"> Imitation Game as a measure</text>
+      <text x="650" y="108" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c"> of machine intelligence.</text>
+      <text x="650" y="126" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947">GPT-4 (2023): Some argue</text>
+      <text x="650" y="138" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947">it passes in casual chat.</text>
+      <text x="650" y="152" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947">Critics: test is insufficient.</text>
+      <text x="650" y="165" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">Chinese Room: Searle (1980)</text>
+    </svg>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+  3 — HISTORY
+══════════════════════════════ -->
+<div id="p-history" class="panel">
+<div class="wrap">
+  <div class="sec">
+    <div class="tag">Chapter 3 — History</div>
+    <h2>History of Artificial Intelligence</h2>
+    <p>AI's history is a story of extraordinary ambition, repeated cycles of excitement and disappointment ("AI winters"), and ultimately, triumph. From mythological automatons to modern large language models — here is the complete timeline.</p>
+  </div>
+
+  <div class="two-col">
+  <div>
+  <div class="box">
+    <div class="box-title"><div class="pip"></div>COMPLETE AI TIMELINE</div>
+    <div style="padding:20px 16px">
+    <div class="timeline">
+      <div class="tl-item" style="--i:0;--dot:#00f5c4">
+        <div class="tl-year">~300 BC – 1800s</div>
+        <div class="tl-title">Ancient Roots &amp; Early Automatons</div>
+        <div class="tl-body">Greek myths described Talos (a mechanical giant), Pygmalion's statue, and Hephaestus's mechanical servants. In 1770, Wolfgang von Kempelen built "The Turk" — a chess-playing automaton (secretly had a human inside). Leonardo da Vinci sketched a mechanical knight in 1495.</div>
+      </div>
+      <div class="tl-item" style="--i:1;--dot:#00d4ff">
+        <div class="tl-year">1936–1943</div>
+        <div class="tl-title">The Mathematical Foundations</div>
+        <div class="tl-body">Alan Turing defines "computable" (Turing Machine, 1936). Warren McCulloch &amp; Walter Pitts publish "A Logical Calculus of Ideas Immanent in Nervous Activity" (1943) — the first mathematical model of a neural network.</div>
+      </div>
+      <div class="tl-item" style="--i:2;--dot:#00d4ff">
+        <div class="tl-year">1950</div>
+        <div class="tl-title">Turing's "Computing Machinery and Intelligence"</div>
+        <div class="tl-body">Alan Turing proposes the Imitation Game (Turing Test). Asks: "Can machines think?" This single paper launches the entire field philosophically.</div>
+      </div>
+      <div class="tl-item" style="--i:3;--dot:#ffc947">
+        <div class="tl-year">1956 — THE BIRTH OF AI</div>
+        <div class="tl-title">Dartmouth Conference — AI is Named</div>
+        <div class="tl-body">John McCarthy, Marvin Minsky, Claude Shannon, and Nathaniel Rochester organize a summer workshop at Dartmouth College. McCarthy coins the term "Artificial Intelligence." The field is officially born.</div>
+      </div>
+      <div class="tl-item" style="--i:4;--dot:#ffc947">
+        <div class="tl-year">1956–1974</div>
+        <div class="tl-title">Golden Age — Early Optimism</div>
+        <div class="tl-body">Programs like Logic Theorist (proved 38 of 52 Principia Mathematica theorems), ELIZA (first chatbot, 1966), and SHRDLU (natural language) wow researchers. Minsky predicts AGI "within a generation." Funding pours in.</div>
+      </div>
+      <div class="tl-item" style="--i:5;--dot:#ff5f6d">
+        <div class="tl-year">1974–1980</div>
+        <div class="tl-title">First AI Winter ❄️</div>
+        <div class="tl-body">Lighthill Report (1973) criticises AI progress. DARPA cuts funding. Combinatorial explosion problem — machines couldn't scale to real-world complexity. NLP hit walls. Progress stalls dramatically.</div>
+      </div>
+      <div class="tl-item" style="--i:6;--dot:#00f5c4">
+        <div class="tl-year">1980–1987</div>
+        <div class="tl-title">Expert Systems Boom</div>
+        <div class="tl-body">XCON (R1) saves DEC $40M/year diagnosing computer configurations. Japan launches Fifth Generation Computer project. Expert Systems (rule-based AI) become commercially valuable. AI industry worth $1 billion.</div>
+      </div>
+      <div class="tl-item" style="--i:7;--dot:#ff5f6d">
+        <div class="tl-year">1987–1993</div>
+        <div class="tl-title">Second AI Winter ❄️</div>
+        <div class="tl-body">Expert systems too expensive to maintain. Desktop PCs surpassed dedicated AI hardware. Japan's 5th Gen project fails. DARPA ends funding. AI becomes taboo — researchers avoid the term.</div>
+      </div>
+      <div class="tl-item" style="--i:8;--dot:#b87fff">
+        <div class="tl-year">1997</div>
+        <div class="tl-title">Deep Blue Defeats Garry Kasparov</div>
+        <div class="tl-body">IBM's Deep Blue beats world chess champion Garry Kasparov 3.5–2.5. First time a computer defeats a human world champion under standard chess tournament conditions. Milestone moment for AI credibility.</div>
+      </div>
+      <div class="tl-item" style="--i:9;--dot:#00d4ff">
+        <div class="tl-year">1998–2006</div>
+        <div class="tl-title">ML Renaissance &amp; Internet Data</div>
+        <div class="tl-body">Geoffrey Hinton's Restricted Boltzmann Machines reignite neural network research. Google uses PageRank (graph ML). Support Vector Machines achieve SOTA on many benchmarks. Netflix Prize ($1M) popularises recommender systems.</div>
+      </div>
+      <div class="tl-item" style="--i:10;--dot:#ffc947">
+        <div class="tl-year">2012 — DEEP LEARNING REVOLUTION</div>
+        <div class="tl-title">AlexNet Wins ImageNet — Everything Changes</div>
+        <div class="tl-body">Hinton's team submits AlexNet to ImageNet competition. Error rate: 15.3% vs 26.2% (next best). Crushed every prior approach. The moment that launched modern deep learning. GPU training becomes standard practice.</div>
+      </div>
+      <div class="tl-item" style="--i:11;--dot:#00f5c4">
+        <div class="tl-year">2016</div>
+        <div class="tl-title">AlphaGo Defeats Lee Sedol 4-1</div>
+        <div class="tl-body">DeepMind's AlphaGo beats world Go champion Lee Sedol. Go has more board configurations than atoms in the universe — thought to require human intuition. The famous "Move 37" shocks experts as superhuman creative play.</div>
+      </div>
+      <div class="tl-item" style="--i:12;--dot:#ffc947">
+        <div class="tl-year">2017</div>
+        <div class="tl-title">"Attention Is All You Need" — Transformers</div>
+        <div class="tl-body">Google Brain publishes the Transformer architecture. Attention mechanisms replace RNNs. Foundation of GPT, BERT, T5, CLIP, DALL-E — essentially every modern AI. The most influential ML paper ever written.</div>
+      </div>
+      <div class="tl-item" style="--i:13;--dot:#b87fff">
+        <div class="tl-year">2020</div>
+        <div class="tl-title">GPT-3 — 175 Billion Parameters</div>
+        <div class="tl-body">OpenAI's GPT-3 shows that scaling transformer models produces emergent capabilities. Writes essays, code, poetry. Passes bar exam drafts. Sparks explosion of language model investment and research.</div>
+      </div>
+      <div class="tl-item" style="--i:14;--dot:#00d4ff">
+        <div class="tl-year">2021</div>
+        <div class="tl-title">AlphaFold Solves Protein Folding</div>
+        <div class="tl-body">DeepMind's AlphaFold2 predicts 3D protein structures with near-experimental accuracy. Solving in minutes what took labs years. Called "the most important achievement in AI" for its life-sciences impact.</div>
+      </div>
+      <div class="tl-item" style="--i:15;--dot:#ffc947">
+        <div class="tl-year">2022–2023</div>
+        <div class="tl-title">ChatGPT &amp; The Generative AI Era</div>
+        <div class="tl-body">ChatGPT reaches 100M users in 2 months — fastest product in history. GPT-4, Gemini, Claude, Llama, Stable Diffusion, DALL-E 3, Sora. Generative AI becomes mainstream. AGI debate intensifies. AI regulation begins globally.</div>
+      </div>
+    </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="card-stack">
+    <div class="card" style="--cl:var(--red)">
+      <h4>AI Winters Explained</h4>
+      <p>An "AI Winter" is a period of drastically reduced funding and interest. They happen when AI hype outpaces reality. Two major winters: 1974–80 and 1987–93. The lesson: overpromising leads to overcorrecting. Today's AI boom is backed by real results.</p>
+    </div>
+    <div class="card" style="--cl:var(--gold)">
+      <h4>The Scaling Hypothesis</h4>
+      <p>The controversial modern theory: making models bigger (more parameters, more data, more compute) consistently produces better AI. GPT-2→3→4 each 100× bigger, each dramatically smarter. Some researchers believe scaling alone leads to AGI.</p>
+    </div>
+    <div class="card" style="--cl:var(--teal)">
+      <h4>Moore's Law &amp; AI</h4>
+      <p>AI compute doubles every 3.4 months (faster than Moore's Law). From AlexNet (2012) to GPT-4 (2023), compute used for training grew by 10 million times. This exponential trend is why AI progress seems sudden — it's been compounding quietly for years.</p>
+    </div>
+    <div class="card" style="--cl:var(--violet)">
+      <h4>The Bitter Lesson</h4>
+      <p>Rich Sutton's famous 2019 essay: "The biggest lesson from 70 years of AI research is that general methods that leverage computation are ultimately the most effective." Every time hand-coded knowledge was abandoned for learned representations, performance improved.</p>
+    </div>
+  </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+  4 — INVENTORS
+══════════════════════════════ -->
+<div id="p-inventors" class="panel">
+<div class="wrap">
+  <div class="sec">
+    <div class="tag">Chapter 4 — Pioneers</div>
+    <h2>Key Inventors &amp; Their Contributions</h2>
+    <p>AI was built by giants. These researchers dedicated their careers to pushing the boundaries of what machines can do — often working in obscurity for decades before their ideas changed the world.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:20px;">
+
+    <div class="person-card" style="--cl:var(--cyan)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div class="person-avatar" style="--cl:var(--cyan)">🧠</div>
+        <div><div class="person-name">Alan Turing</div><div class="person-dates">1912–1954 · British</div><div class="person-role" style="color:var(--cyan)">Father of Computer Science &amp; AI</div></div>
+      </div>
+      <p class="person-desc">Invented the Turing Machine (theoretical foundation of computation), broke the Enigma cipher (saving millions of lives), proposed the Turing Test (1950). Created the mathematical basis for all modern computing.</p>
+      <div class="person-contrib">Key works: "On Computable Numbers" (1936), "Computing Machinery and Intelligence" (1950)</div>
+      <div class="progress-meter"><div class="progress-fill" style="width:100%;background:linear-gradient(90deg,var(--cyan),var(--teal))"></div></div>
+      <div style="font-size:.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace">IMPACT LEVEL: FOUNDATIONAL</div>
+    </div>
+
+    <div class="person-card" style="--cl:var(--gold)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div class="person-avatar" style="--cl:var(--gold)">🎓</div>
+        <div><div class="person-name">John McCarthy</div><div class="person-dates">1927–2011 · American</div><div class="person-role" style="color:var(--gold)">Named "Artificial Intelligence"</div></div>
+      </div>
+      <p class="person-desc">Organized the Dartmouth Conference (1956), coined the term "Artificial Intelligence," invented LISP (still used in AI), created the first time-sharing operating system concepts, and pioneered formal methods in AI.</p>
+      <div class="person-contrib">Key works: Dartmouth Proposal (1955), invented LISP (1958), created the situation calculus</div>
+      <div class="progress-meter"><div class="progress-fill" style="width:95%;background:linear-gradient(90deg,var(--gold),#ff9f43)"></div></div>
+      <div style="font-size:.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace">IMPACT LEVEL: FOUNDATIONAL</div>
+    </div>
+
+    <div class="person-card" style="--cl:var(--violet)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div class="person-avatar" style="--cl:var(--violet)">🔮</div>
+        <div><div class="person-name">Marvin Minsky</div><div class="person-dates">1927–2016 · American</div><div class="person-role" style="color:var(--violet)">Co-founder of MIT AI Lab</div></div>
+      </div>
+      <p class="person-desc">Co-founded MIT's AI laboratory. Proposed the Society of Mind theory (intelligence = interaction of many simple agents). Built early neural networks. His book "Perceptrons" (1969) controversially stalled neural network research for a decade.</p>
+      <div class="person-contrib">Key works: "Society of Mind" (1986), "The Emotion Machine" (2006), MIT AI Lab (1959)</div>
+      <div class="progress-meter"><div class="progress-fill" style="width:90%;background:linear-gradient(90deg,var(--violet),#d4a0ff)"></div></div>
+    </div>
+
+    <div class="person-card" style="--cl:var(--teal)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div class="person-avatar" style="--cl:var(--teal)">🌊</div>
+        <div><div class="person-name">Geoffrey Hinton</div><div class="person-dates">1947–present · British-Canadian</div><div class="person-role" style="color:var(--teal)">"Godfather of Deep Learning"</div></div>
+      </div>
+      <p class="person-desc">Pioneered backpropagation (the algorithm that trains neural networks), Boltzmann Machines, deep belief networks, dropout regularisation, capsule networks. Won the Turing Award 2018. Left Google in 2023 over AI safety concerns.</p>
+      <div class="person-contrib">Key works: Backpropagation (1986), deep belief nets (2006), AlexNet (2012), Dropout (2014)</div>
+      <div class="progress-meter"><div class="progress-fill" style="width:98%;background:linear-gradient(90deg,var(--teal),#00a88c)"></div></div>
+      <div style="font-size:.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace">IMPACT LEVEL: TRANSFORMATIVE</div>
+    </div>
+
+    <div class="person-card" style="--cl:var(--blue)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div class="person-avatar" style="--cl:var(--blue)">⚡</div>
+        <div><div class="person-name">Yann LeCun</div><div class="person-dates">1960–present · French-American</div><div class="person-role" style="color:var(--blue)">Inventor of CNNs</div></div>
+      </div>
+      <p class="person-desc">Invented Convolutional Neural Networks (CNNs), which power all modern image recognition. Developed LeNet for MNIST digit recognition (1989). Chief AI Scientist at Meta. Co-recipient of Turing Award 2018. Vocal critic of LLM limitations.</p>
+      <div class="person-contrib">Key works: LeNet (1989), CNNs, MNIST dataset, "A Path Towards Autonomous Machine Intelligence" (2022)</div>
+      <div class="progress-meter"><div class="progress-fill" style="width:92%;background:linear-gradient(90deg,var(--blue),#6bb5ff)"></div></div>
+    </div>
+
+    <div class="person-card" style="--cl:var(--red)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div class="person-avatar" style="--cl:var(--red)">🎯</div>
+        <div><div class="person-name">Yoshua Bengio</div><div class="person-dates">1964–present · Canadian</div><div class="person-role" style="color:var(--red)">Pioneer of Deep Learning</div></div>
+      </div>
+      <p class="person-desc">Led fundamental research on recurrent neural networks, attention mechanisms (precursor to Transformers), word embeddings (Word2Vec-era), and GAN theory. Turing Award 2018. Founded Mila (world's largest academic AI lab).</p>
+      <div class="person-contrib">Key works: RNNs for sequences, neural attention, CIFAR AI program, AI safety advocacy</div>
+      <div class="progress-meter"><div class="progress-fill" style="width:88%;background:linear-gradient(90deg,var(--red),#ff9090)"></div></div>
+    </div>
+
+    <div class="person-card" style="--cl:var(--gold)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div class="person-avatar" style="--cl:var(--gold)">🤖</div>
+        <div><div class="person-name">Demis Hassabis</div><div class="person-dates">1976–present · British</div><div class="person-role" style="color:var(--gold)">CEO &amp; Co-founder of DeepMind</div></div>
+      </div>
+      <p class="person-desc">Co-founded DeepMind (acquired by Google 2014). Led development of AlphaGo, AlphaZero, AlphaFold, AlphaStar, Gemini. Former child chess prodigy, game designer, neuroscientist. Nobel Prize in Chemistry 2024 (AlphaFold).</p>
+      <div class="person-contrib">Key works: AlphaGo (2016), AlphaFold (2021), Nobel Prize Chemistry 2024, Gemini AI</div>
+      <div class="progress-meter"><div class="progress-fill" style="width:97%;background:linear-gradient(90deg,var(--gold),#ffd580)"></div></div>
+      <div style="font-size:.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace">IMPACT LEVEL: TRANSFORMATIVE</div>
+    </div>
+
+    <div class="person-card" style="--cl:var(--cyan)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div class="person-avatar" style="--cl:var(--cyan)">💡</div>
+        <div><div class="person-name">Claude Shannon</div><div class="person-dates">1916–2001 · American</div><div class="person-role" style="color:var(--cyan)">Father of Information Theory</div></div>
+      </div>
+      <p class="person-desc">Founded Information Theory with "A Mathematical Theory of Communication" (1948). Defined the bit. First to propose using Boolean algebra for circuit design. Built an early chess-playing program. Co-organized Dartmouth conference.</p>
+      <div class="person-contrib">Key works: Information Theory (1948), Shannon entropy, chess programming, Theseus the mouse (1952)</div>
+      <div class="progress-meter"><div class="progress-fill" style="width:94%;background:linear-gradient(90deg,var(--cyan),var(--teal))"></div></div>
+    </div>
+
+    <div class="person-card" style="--cl:var(--violet)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div class="person-avatar" style="--cl:var(--violet)">🧬</div>
+        <div><div class="person-name">Warren McCulloch &amp; Walter Pitts</div><div class="person-dates">1940s · American</div><div class="person-role" style="color:var(--violet)">First Neural Network Model</div></div>
+      </div>
+      <p class="person-desc">Published the first mathematical model of a neuron (1943) — the McCulloch-Pitts neuron. Showed that networks of simplified neurons could compute any logical function. Directly inspired all future work in neural networks and connectionism.</p>
+      <div class="person-contrib">Key works: "A Logical Calculus of Ideas Immanent in Nervous Activity" (1943)</div>
+      <div class="progress-meter"><div class="progress-fill" style="width:82%;background:linear-gradient(90deg,var(--violet),#c8a0ff)"></div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+  5 — AGENTS
+══════════════════════════════ -->
+<div id="p-agents" class="panel">
+<div class="wrap">
+  <div class="sec">
+    <div class="tag">Chapter 5 — Agents</div>
+    <h2>Intelligent Agents — The Core Unit of AI</h2>
+    <p>An <strong style="color:var(--cyan)">intelligent agent</strong> is anything that perceives its environment through sensors and acts upon it through actuators. This is the foundational concept in modern AI — every AI system, from a thermostat to GPT-4, can be modelled as an agent.</p>
+  </div>
+
+  <!-- Agent loop -->
+  <div class="box">
+    <div class="box-title"><div class="pip"></div>THE AGENT-ENVIRONMENT INTERACTION LOOP</div>
+    <svg viewBox="0 0 860 240" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="ag"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <marker id="ama" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10z" fill="#00d4ff"/>
+        </marker>
+        <marker id="amb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10z" fill="#ffc947"/>
+        </marker>
+      </defs>
+      <rect width="860" height="240" fill="#040f1f"/>
+
+      <!-- ENVIRONMENT -->
+      <rect x="20" y="30" width="200" height="180" rx="6" fill="rgba(0,245,196,.04)" stroke="rgba(0,245,196,.3)" stroke-width="1.5"/>
+      <text x="120" y="55" text-anchor="middle" font-family="Cinzel,serif" font-size="14" fill="#00f5c4">ENVIRONMENT</text>
+      <text x="120" y="80" text-anchor="middle" font-size="16">🌍</text>
+      <text x="120" y="108" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#0d4060">Physical world / Game board</text>
+      <text x="120" y="122" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#0d4060">Internet / Stock market</text>
+      <text x="120" y="136" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#0d4060">Human users / Other agents</text>
+      <text x="120" y="160" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00f5c4">State: fully/partially</text>
+      <text x="120" y="174" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00f5c4">observable · stochastic</text>
+      <text x="120" y="188" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00f5c4">deterministic · dynamic</text>
+
+      <!-- AGENT -->
+      <rect x="320" y="20" width="220" height="200" rx="6" fill="rgba(0,212,255,.06)" stroke="#00d4ff" stroke-width="2" filter="url(#ag)"/>
+      <text x="430" y="44" text-anchor="middle" font-family="Cinzel,serif" font-size="15" font-weight="700" fill="#00d4ff">AGENT</text>
+
+      <!-- Internal components -->
+      <rect x="336" y="54" width="188" height="30" rx="3" fill="rgba(0,212,255,.08)" stroke="rgba(0,212,255,.3)" stroke-width="1"/>
+      <text x="430" y="68" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00a8cc">SENSORS (Perceive)</text>
+      <text x="430" y="79" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#1a3a5c">camera · mic · keyboard · API</text>
+
+      <rect x="336" y="92" width="188" height="60" rx="3" fill="rgba(255,201,71,.06)" stroke="rgba(255,201,71,.3)" stroke-width="1"/>
+      <text x="430" y="110" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#ffc947">INTERNAL STATE / MEMORY</text>
+      <text x="430" y="124" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#6b5000">World model · Goals · Beliefs</text>
+      <text x="430" y="138" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#6b5000">Past percepts · Knowledge base</text>
+
+      <rect x="336" y="162" width="88" height="36" rx="3" fill="rgba(184,127,255,.06)" stroke="rgba(184,127,255,.3)" stroke-width="1"/>
+      <text x="380" y="178" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#b87fff">REASONING</text>
+      <text x="380" y="190" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#4a2080">decision-making</text>
+
+      <rect x="432" y="162" width="92" height="36" rx="3" fill="rgba(0,245,196,.06)" stroke="rgba(0,245,196,.3)" stroke-width="1"/>
+      <text x="478" y="178" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00f5c4">ACTUATORS</text>
+      <text x="478" y="190" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#003d30">actions · outputs</text>
+
+      <!-- PERCEPTS arrow -->
+      <path d="M222,90 L318,90" fill="none" stroke="#00d4ff" stroke-width="2" marker-end="url(#ama)" stroke-dasharray="6 3">
+        <animate attributeName="stroke-dashoffset" values="0;-90" dur="1.5s" repeatCount="indefinite"/>
+      </path>
+      <text x="270" y="83" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00a8cc">PERCEPTS</text>
+
+      <!-- ACTIONS arrow -->
+      <path d="M542,150 L640,150" fill="none" stroke="#ffc947" stroke-width="2" marker-end="url(#amb)" stroke-dasharray="6 3">
+        <animate attributeName="stroke-dashoffset" values="0;-90" dur="1.5s" repeatCount="indefinite" begin="-0.75s"/>
+      </path>
+      <text x="592" y="143" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947">ACTIONS</text>
+
+      <!-- REWARD feedback -->
+      <path d="M680,90 Q750,90 750,50 Q750,10 430,10 Q220,10 120,20" fill="none" stroke="rgba(0,245,196,.5)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ama)">
+        <animate attributeName="stroke-dashoffset" values="0;-200" dur="3s" repeatCount="indefinite"/>
+      </path>
+      <text x="750" y="85" font-family="JetBrains Mono,monospace" font-size="8" fill="#00f5c4">REWARD</text>
+      <text x="750" y="97" font-family="JetBrains Mono,monospace" font-size="7" fill="#1a3a5c">(RL signal)</text>
+
+      <!-- Goal / Performance -->
+      <rect x="660" y="110" width="180" height="100" rx="5" fill="rgba(0,0,0,.4)" stroke="var(--border)" stroke-width="1"/>
+      <text x="750" y="130" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947" letter-spacing="1">PERFORMANCE MEASURE</text>
+      <text x="670" y="150" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">▸ Maximize score/reward</text>
+      <text x="670" y="165" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">▸ Achieve goals</text>
+      <text x="670" y="180" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">▸ Minimise cost/error</text>
+      <text x="670" y="195" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">▸ Satisfy constraints</text>
+    </svg>
+  </div>
+
+  <!-- 5 types of agents -->
+  <div class="box">
+    <div class="box-title"><div class="pip"></div>5 TYPES OF INTELLIGENT AGENTS</div>
+    <svg viewBox="0 0 860 200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="860" height="200" fill="#040f1f"/>
+      <defs>
+        <linearGradient id="agPower" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#00d4ff" stop-opacity=".15"/>
+          <stop offset="100%" stop-color="#040f1f" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Type 1: Simple Reflex -->
+      <rect x="12" y="15" width="156" height="170" rx="4" fill="rgba(0,212,255,.03)" stroke="rgba(0,212,255,.25)" stroke-width="1.2"/>
+      <text x="90" y="36" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00d4ff" letter-spacing="1">SIMPLE REFLEX</text>
+      <text x="90" y="56" text-anchor="middle" font-size="18">⚡</text>
+      <text x="90" y="78" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">IF percept → action</text>
+      <text x="90" y="92" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">No memory, no future</text>
+      <text x="22" y="115" font-family="JetBrains Mono,monospace" font-size="7" fill="#0d4060">▸ Thermostat</text>
+      <text x="22" y="129" font-family="JetBrains Mono,monospace" font-size="7" fill="#0d4060">▸ Obstacle sensors</text>
+      <text x="22" y="143" font-family="JetBrains Mono,monospace" font-size="7" fill="#0d4060">▸ Spam filter rules</text>
+      <text x="90" y="170" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00d4ff">Reactive</text>
+
+      <!-- Type 2: Model-based -->
+      <rect x="177" y="15" width="160" height="170" rx="4" fill="rgba(255,201,71,.03)" stroke="rgba(255,201,71,.25)" stroke-width="1.2"/>
+      <text x="257" y="36" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947" letter-spacing="1">MODEL-BASED</text>
+      <text x="257" y="56" text-anchor="middle" font-size="18">🗺️</text>
+      <text x="257" y="78" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#6b5000">Maintains internal model</text>
+      <text x="257" y="92" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#6b5000">of how world works</text>
+      <text x="187" y="115" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b5000">▸ Self-driving car</text>
+      <text x="187" y="129" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b5000">▸ Roomba with map</text>
+      <text x="187" y="143" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b5000">▸ Chess engine</text>
+      <text x="257" y="170" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947">Has memory</text>
+
+      <!-- Type 3: Goal-based -->
+      <rect x="346" y="15" width="156" height="170" rx="4" fill="rgba(0,245,196,.03)" stroke="rgba(0,245,196,.25)" stroke-width="1.2"/>
+      <text x="424" y="36" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00f5c4" letter-spacing="1">GOAL-BASED</text>
+      <text x="424" y="56" text-anchor="middle" font-size="18">🎯</text>
+      <text x="424" y="78" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#003d30">Searches for actions</text>
+      <text x="424" y="92" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#003d30">that achieve goals</text>
+      <text x="356" y="115" font-family="JetBrains Mono,monospace" font-size="7" fill="#003d30">▸ GPS navigation</text>
+      <text x="356" y="129" font-family="JetBrains Mono,monospace" font-size="7" fill="#003d30">▸ Planning systems</text>
+      <text x="356" y="143" font-family="JetBrains Mono,monospace" font-size="7" fill="#003d30">▸ Robot assembly</text>
+      <text x="424" y="170" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00f5c4">Goal-directed</text>
+
+      <!-- Type 4: Utility-based -->
+      <rect x="511" y="15" width="160" height="170" rx="4" fill="rgba(184,127,255,.03)" stroke="rgba(184,127,255,.25)" stroke-width="1.2"/>
+      <text x="591" y="36" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#b87fff" letter-spacing="1">UTILITY-BASED</text>
+      <text x="591" y="56" text-anchor="middle" font-size="18">⚖️</text>
+      <text x="591" y="78" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#4a2080">Maximises utility fn</text>
+      <text x="591" y="92" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#4a2080">Trades off preferences</text>
+      <text x="521" y="115" font-family="JetBrains Mono,monospace" font-size="7" fill="#4a2080">▸ AlphaGo / AlphaZero</text>
+      <text x="521" y="129" font-family="JetBrains Mono,monospace" font-size="7" fill="#4a2080">▸ Trading algorithms</text>
+      <text x="521" y="143" font-family="JetBrains Mono,monospace" font-size="7" fill="#4a2080">▸ Recommendation sys</text>
+      <text x="591" y="170" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#b87fff">Maximises U(state)</text>
+
+      <!-- Type 5: Learning -->
+      <rect x="680" y="15" width="168" height="170" rx="4" fill="rgba(255,95,109,.03)" stroke="rgba(255,95,109,.3)" stroke-width="1.5"/>
+      <text x="764" y="36" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ff5f6d" letter-spacing="1">LEARNING AGENT</text>
+      <text x="764" y="56" text-anchor="middle" font-size="18">🧠</text>
+      <text x="764" y="78" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#6b1a20">Improves from experience</text>
+      <text x="764" y="92" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#6b1a20">Explores + exploits</text>
+      <text x="690" y="115" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b1a20">▸ ChatGPT / Claude</text>
+      <text x="690" y="129" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b1a20">▸ AlphaZero (RL)</text>
+      <text x="690" y="143" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b1a20">▸ Any DL system</text>
+      <text x="764" y="170" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ff5f6d">Most powerful ★</text>
+    </svg>
+  </div>
+
+  <div class="three-col">
+    <div class="card" style="--cl:var(--cyan)">
+      <h4>PEAS Framework</h4>
+      <p>Every agent is described by <code>PEAS</code>:<br>
+      <code>P</code>erformance measure — what is success?<br>
+      <code>E</code>nvironment — where does it operate?<br>
+      <code>A</code>ctuators — how does it act?<br>
+      <code>S</code>ensors — how does it perceive?<br><br>
+      Example — Self-driving car: P=safety/speed, E=roads, A=steering/brakes, S=cameras/LIDAR</p>
+    </div>
+    <div class="card" style="--cl:var(--gold)">
+      <h4>Multi-Agent Systems</h4>
+      <p>Multiple AI agents interacting in a shared environment. They can be <code>cooperative</code> (work together — robot swarms), <code>competitive</code> (game AI opponents), or <code>mixed</code>. Emergent behaviour arises when simple agent rules produce complex global patterns.</p>
+    </div>
+    <div class="card" style="--cl:var(--teal)">
+      <h4>Reinforcement Learning Agent</h4>
+      <p>The most powerful agent type. Learns by trial-and-error: take action → receive reward/penalty → update policy. Used by AlphaGo, game-playing AIs, robotic control, and drug discovery. Formalised as Markov Decision Processes (MDPs).</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+  6 — ML & NEURAL NETS
+══════════════════════════════ -->
+<div id="p-ml" class="panel">
+<div class="wrap">
+  <div class="sec">
+    <div class="tag">Chapter 6 — Machine Learning</div>
+    <h2>Machine Learning &amp; Neural Networks</h2>
+    <p>Machine Learning is the engine of modern AI. Instead of hand-coding rules, we give machines data and let them discover patterns. Neural networks — loosely inspired by the brain — are the most powerful ML tool ever created.</p>
+  </div>
+
+  <div class="two-col">
+  <div>
+  <div class="box">
+    <div class="box-title"><div class="pip"></div>THE ML LANDSCAPE — ALL MAJOR APPROACHES</div>
+    <svg viewBox="0 0 620 370" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="mlg"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <rect width="620" height="370" fill="#040f1f"/>
+
+      <!-- Big ML circle -->
+      <circle cx="310" cy="185" r="170" fill="rgba(0,212,255,.03)" stroke="rgba(0,212,255,.2)" stroke-width="1.5"/>
+      <text x="310" y="25" text-anchor="middle" font-family="Cinzel,serif" font-size="13" fill="#00a8cc">MACHINE LEARNING</text>
+
+      <!-- Supervised -->
+      <circle cx="180" cy="130" r="80" fill="rgba(255,201,71,.05)" stroke="rgba(255,201,71,.35)" stroke-width="1.5"/>
+      <text x="180" y="92" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="11" font-weight="700" fill="#ffc947">SUPERVISED</text>
+      <text x="180" y="108" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#6b5000">Labelled data</text>
+      <text x="180" y="122" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#6b5000">Input → Expected output</text>
+      <text x="155" y="140" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b5000">▸ Classification</text>
+      <text x="155" y="154" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b5000">▸ Regression</text>
+      <text x="155" y="168" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b5000">▸ Image recognition</text>
+      <text x="155" y="182" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b5000">▸ Spam detection</text>
+
+      <!-- Unsupervised -->
+      <circle cx="435" cy="130" r="78" fill="rgba(0,245,196,.04)" stroke="rgba(0,245,196,.3)" stroke-width="1.5"/>
+      <text x="435" y="90" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="11" font-weight="700" fill="#00f5c4">UNSUPERVISED</text>
+      <text x="435" y="106" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#003d30">No labels — find patterns</text>
+      <text x="410" y="124" font-family="JetBrains Mono,monospace" font-size="7" fill="#003d30">▸ Clustering (k-means)</text>
+      <text x="410" y="138" font-family="JetBrains Mono,monospace" font-size="7" fill="#003d30">▸ Dimensionality red.</text>
+      <text x="410" y="152" font-family="JetBrains Mono,monospace" font-size="7" fill="#003d30">▸ Anomaly detection</text>
+      <text x="410" y="166" font-family="JetBrains Mono,monospace" font-size="7" fill="#003d30">▸ Autoencoders, GANs</text>
+      <text x="410" y="180" font-family="JetBrains Mono,monospace" font-size="7" fill="#003d30">▸ Word2Vec, LLMs</text>
+
+      <!-- Reinforcement -->
+      <circle cx="310" cy="295" r="72" fill="rgba(255,95,109,.04)" stroke="rgba(255,95,109,.3)" stroke-width="1.5"/>
+      <text x="310" y="258" text-anchor="middle" font-family="Exo 2,sans-serif" font-size="11" font-weight="700" fill="#ff5f6d">REINFORCEMENT</text>
+      <text x="310" y="272" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#6b1a20">Agent + Reward signal</text>
+      <text x="270" y="292" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b1a20">▸ AlphaGo / OpenAI 5</text>
+      <text x="270" y="306" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b1a20">▸ Robotics control</text>
+      <text x="270" y="320" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b1a20">▸ Self-driving, trading</text>
+
+      <!-- Deep Learning overlay -->
+      <ellipse cx="310" cy="185" rx="110" ry="60" fill="rgba(184,127,255,.06)" stroke="rgba(184,127,255,.4)" stroke-width="1.5" stroke-dasharray="5 3"/>
+      <text x="310" y="178" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#b87fff" letter-spacing="1">DEEP LEARNING</text>
+      <text x="310" y="192" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#4a2080">(Neural Networks 3+ layers)</text>
+      <text x="310" y="206" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#4a2080">CNN · RNN · Transformer · GAN</text>
+    </svg>
+  </div>
+
+  <div class="box">
+    <div class="box-title"><div class="pip"></div>NEURAL NETWORK — HOW IT LEARNS (BACKPROPAGATION)</div>
+    <svg viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="620" height="200" fill="#040f1f"/>
+      <defs>
+        <filter id="nnG"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <marker id="fwd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="#00d4ff" opacity=".7"/></marker>
+        <marker id="bwd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="#ff5f6d" opacity=".7"/></marker>
+      </defs>
+
+      <!-- INPUT LAYER -->
+      <text x="65" y="18" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">INPUT</text>
+      <g fill="rgba(0,212,255,.1)" stroke="#00d4ff" stroke-width="1.5">
+        <circle cx="65" cy="55" r="16" filter="url(#nnG)"/><text x="65" y="59" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00d4ff">x₁</text>
+        <circle cx="65" cy="100" r="16" filter="url(#nnG)"/><text x="65" y="104" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00d4ff">x₂</text>
+        <circle cx="65" cy="145" r="16" filter="url(#nnG)"/><text x="65" y="149" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00d4ff">x₃</text>
+      </g>
+      <!-- HIDDEN 1 -->
+      <text x="200" y="18" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">HIDDEN 1</text>
+      <g fill="rgba(255,201,71,.08)" stroke="#ffc947" stroke-width="1.3">
+        <circle cx="200" cy="40" r="14"/><text x="200" y="44" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#ffc947">h₁</text>
+        <circle cx="200" cy="80" r="14"/><text x="200" y="84" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#ffc947">h₂</text>
+        <circle cx="200" cy="120" r="14"/><text x="200" y="124" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#ffc947">h₃</text>
+        <circle cx="200" cy="160" r="14"/><text x="200" y="164" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#ffc947">h₄</text>
+      </g>
+      <!-- HIDDEN 2 -->
+      <text x="340" y="18" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">HIDDEN 2</text>
+      <g fill="rgba(184,127,255,.08)" stroke="#b87fff" stroke-width="1.3">
+        <circle cx="340" cy="55" r="14"/><text x="340" y="59" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#b87fff">h₅</text>
+        <circle cx="340" cy="100" r="14"/><text x="340" y="104" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#b87fff">h₆</text>
+        <circle cx="340" cy="145" r="14"/><text x="340" y="149" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#b87fff">h₇</text>
+      </g>
+      <!-- OUTPUT -->
+      <text x="480" y="18" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#1a3a5c">OUTPUT</text>
+      <g fill="rgba(0,245,196,.1)" stroke="#00f5c4" stroke-width="1.8">
+        <circle cx="480" cy="80" r="18" filter="url(#nnG)"/><text x="480" y="77" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#00f5c4">ŷ</text><text x="480" y="88" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#00f5c4">pred</text>
+        <circle cx="480" cy="130" r="18" filter="url(#nnG)"/><text x="480" y="134" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#00f5c4">class</text>
+      </g>
+
+      <!-- Forward connections (simplified) -->
+      <g stroke="rgba(0,212,255,.2)" stroke-width="0.8" fill="none">
+        <line x1="81" y1="55" x2="186" y2="40"/>  <line x1="81" y1="55" x2="186" y2="80"/>
+        <line x1="81" y1="100" x2="186" y2="80"/> <line x1="81" y1="100" x2="186" y2="120"/>
+        <line x1="81" y1="145" x2="186" y2="120"/><line x1="81" y1="145" x2="186" y2="160"/>
+        <line x1="81" y1="55" x2="186" y2="160"/> <line x1="81" y1="145" x2="186" y2="40"/>
+      </g>
+      <g stroke="rgba(255,201,71,.2)" stroke-width="0.8" fill="none">
+        <line x1="214" y1="40" x2="326" y2="55"/>  <line x1="214" y1="80" x2="326" y2="55"/>
+        <line x1="214" y1="80" x2="326" y2="100"/> <line x1="214" y1="120" x2="326" y2="100"/>
+        <line x1="214" y1="120" x2="326" y2="145"/><line x1="214" y1="160" x2="326" y2="145"/>
+      </g>
+      <g stroke="rgba(184,127,255,.2)" stroke-width="0.8" fill="none">
+        <line x1="354" y1="55" x2="462" y2="80"/>  <line x1="354" y1="100" x2="462" y2="80"/>
+        <line x1="354" y1="100" x2="462" y2="130"/> <line x1="354" y1="145" x2="462" y2="130"/>
+      </g>
+
+      <!-- Forward pass arrow -->
+      <path d="M30,185 L500,185" fill="none" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#fwd)">
+        <animate attributeName="stroke-dashoffset" values="0;-200" dur="2s" repeatCount="indefinite"/>
+      </path>
+      <text x="265" y="198" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00d4ff">FORWARD PASS → prediction</text>
+
+      <!-- Loss & backprop -->
+      <rect x="510" y="60" width="100" height="70" rx="4" fill="rgba(255,95,109,.06)" stroke="rgba(255,95,109,.4)" stroke-width="1.3"/>
+      <text x="560" y="80" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ff5f6d">LOSS</text>
+      <text x="560" y="95" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ff5f6d">L(ŷ, y)</text>
+      <text x="560" y="110" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b1a20">error vs</text>
+      <text x="560" y="122" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b1a20">true label</text>
+      <!-- backprop arrow -->
+      <path d="M508,100 L80,100" fill="none" stroke="rgba(255,95,109,.5)" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#bwd)">
+        <animate attributeName="stroke-dashoffset" values="0;200" dur="2s" repeatCount="indefinite" begin="-1s"/>
+      </path>
+      <text x="290" y="94" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#ff5f6d">← BACKPROPAGATION (adjust weights with gradient descent)</text>
+    </svg>
+  </div>
+  </div>
+
+  <div class="card-stack">
+    <div class="card" style="--cl:var(--cyan)">
+      <h4>How Neural Networks Learn</h4>
+      <p><strong>1.</strong> Forward pass: input → layers → prediction<br>
+      <strong>2.</strong> Compute loss: how wrong was the prediction?<br>
+      <strong>3.</strong> Backward pass: compute gradient of loss w.r.t each weight<br>
+      <strong>4.</strong> Update weights: W = W − α·∇W (gradient descent)<br>
+      <strong>5.</strong> Repeat millions of times on batches of data</p>
+      <div class="badge">Convergence: loss → minimum</div>
+    </div>
+    <div class="card" style="--cl:var(--gold)">
+      <h4>Types of Neural Networks</h4>
+      <p><code>CNN</code> — images, spatial patterns (vision AI)<br>
+      <code>RNN/LSTM</code> — sequences, time series, text<br>
+      <code>Transformer</code> — attention-based, GPT/BERT<br>
+      <code>GAN</code> — two nets competing, generates images<br>
+      <code>Autoencoder</code> — compression, anomaly detection<br>
+      <code>GNN</code> — graph-structured data, molecules</p>
+    </div>
+    <div class="card" style="--cl:var(--teal)">
+      <h4>The Transformer Revolution</h4>
+      <p>The 2017 paper "Attention Is All You Need" introduced the Transformer. Its <code>self-attention</code> mechanism lets every token attend to every other token — capturing long-range dependencies that RNNs couldn't. All modern LLMs (GPT, Claude, Gemini) are Transformers.</p>
+    </div>
+    <div class="card" style="--cl:var(--violet)">
+      <h4>Overfitting &amp; Regularisation</h4>
+      <p>A model that memorises training data but fails on new data is <code>overfit</code>. Solutions: Dropout (randomly disable neurons during training), L1/L2 regularisation, data augmentation, cross-validation, early stopping. Bias-variance tradeoff is central to ML.</p>
+    </div>
+    <div class="card" style="--cl:var(--red)">
+      <h4>Large Language Models (LLMs)</h4>
+      <p>LLMs like GPT-4, Claude, Gemini are Transformers trained on trillions of tokens via next-token prediction. They learn grammar, facts, reasoning, and code implicitly. <code>RLHF</code> (Reinforcement Learning from Human Feedback) aligns them to be helpful and safe.</p>
+    </div>
+  </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+  7 — APPLICATIONS
+══════════════════════════════ -->
+<div id="p-apps" class="panel">
+<div class="wrap">
+  <div class="sec">
+    <div class="tag">Chapter 7 — Real-World Applications</div>
+    <h2>AI in the Real World — From Vacuum Cleaners to Space</h2>
+    <p>AI is no longer theoretical. It operates in your home, on the roads, in hospitals, at the stock market, and beyond Earth's atmosphere. Here are the most compelling real-world deployments.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:20px;">
+
+    <div class="app-card" style="--cl:#ffc947">
+      <span class="app-icon">♟️</span>
+      <div class="app-name">Deep Blue — Chess (1997)</div>
+      <div class="app-cat">IBM · Game AI</div>
+      <p class="app-desc">IBM's Deep Blue defeated world champion Garry Kasparov 3.5–2.5 in 1997. It evaluated 200 million positions per second using alpha-beta pruning, handcrafted evaluation functions, and a massive opening/endgame database.</p>
+      <div class="app-fact">⚡ Searched 200M positions/second · Type: Reactive + Model-based Agent</div>
+    </div>
+
+    <div class="app-card" style="--cl:#00f5c4">
+      <span class="app-icon">🀄</span>
+      <div class="app-name">AlphaGo / AlphaZero (2016–17)</div>
+      <div class="app-cat">DeepMind · Reinforcement Learning</div>
+      <p class="app-desc">AlphaGo defeated Lee Sedol 4–1 at Go (10⁷⁰ board states — more than atoms in universe). AlphaZero then mastered Go, Chess, AND Shogi in 24 hours with ZERO prior human knowledge, using only self-play RL + Monte Carlo Tree Search.</p>
+      <div class="app-fact">🌟 Move 37 vs Lee Sedol: rated 1-in-10,000 chance move — superhuman creativity</div>
+    </div>
+
+    <div class="app-card" style="--cl:#b87fff">
+      <span class="app-icon">🎮</span>
+      <div class="app-name">OpenAI Five (Dota 2) &amp; AlphaStar</div>
+      <div class="app-cat">OpenAI / DeepMind · Real-Time Strategy</div>
+      <p class="app-desc">OpenAI Five beat world champion Dota 2 team OG 2–0 in 2019. AlphaStar achieved Grandmaster rank in StarCraft II (99.8th percentile). Both use LSTM networks + PPO reinforcement learning on games with vast action spaces.</p>
+      <div class="app-fact">🎯 Dota 2: 1,000+ possible actions per step, 45min games = 20,000 decisions</div>
+    </div>
+
+    <div class="app-card" style="--cl:#ff5f6d">
+      <span class="app-icon">🤖</span>
+      <div class="app-name">Roomba &amp; Autonomous Vacuum Cleaners</div>
+      <div class="app-cat">iRobot / Others · Robotics Agent</div>
+      <p class="app-desc">The iRobot Roomba (2002) is one of the most commercially successful AI robots. Modern versions use SLAM (Simultaneous Localisation and Mapping), computer vision for obstacle avoidance, and reinforcement learning for efficient coverage paths.</p>
+      <div class="app-fact">🏠 40M+ Roomba units sold · SLAM maps room in real-time while cleaning</div>
+    </div>
+
+    <div class="app-card" style="--cl:#00d4ff">
+      <span class="app-icon">🚗</span>
+      <div class="app-name">Self-Driving Cars</div>
+      <div class="app-cat">Tesla / Waymo / Cruise · Autonomous Vehicles</div>
+      <p class="app-desc">Tesla's FSD (Full Self-Driving) uses 8 cameras + neural networks processing 40 TOPS (trillion operations/second). Waymo's robotaxis use LIDAR + HD maps. These are limited-memory agents with continuous perception-action loops.</p>
+      <div class="app-fact">🚙 Waymo: 1M+ autonomous miles in San Francisco. ~100 decisions/second</div>
+    </div>
+
+    <div class="app-card" style="--cl:#ffc947">
+      <span class="app-icon">🚀</span>
+      <div class="app-name">Space &amp; Interstellar Missions</div>
+      <div class="app-cat">NASA / ESA / SpaceX · Space AI</div>
+      <p class="app-desc">NASA's Mars rovers (Curiosity, Perseverance) use onboard AI for autonomous navigation — 20-minute signal delay means they can't wait for Earth commands. Perseverance's AEGIS system autonomously selects and lasers rock targets. AI analyses exoplanet data from Kepler/JWST.</p>
+      <div class="app-fact">🛸 Ingenuity helicopter: first AI-controlled powered flight on another planet (2021)</div>
+    </div>
+
+    <div class="app-card" style="--cl:#00f5c4">
+      <span class="app-icon">🧬</span>
+      <div class="app-name">AlphaFold — Protein Folding</div>
+      <div class="app-cat">DeepMind · Bioinformatics</div>
+      <p class="app-desc">AlphaFold2 solved the 50-year grand challenge of protein structure prediction. It predicted structures for 200M+ proteins with near-experimental accuracy. Revolutionising drug discovery, vaccine design, and fundamental biology.</p>
+      <div class="app-fact">🏆 Nobel Prize Chemistry 2024 · 200M protein structures — all known biology</div>
+    </div>
+
+    <div class="app-card" style="--cl:#b87fff">
+      <span class="app-icon">🏥</span>
+      <div class="app-name">Medical AI — Diagnosis</div>
+      <div class="app-cat">DeepMind / Google Health · Healthcare</div>
+      <p class="app-desc">Google's LYNA detects breast cancer metastasis in lymph node biopsies with 99% accuracy (vs 73% average human). DeepMind's AI detects 50+ eye diseases from retinal scans as accurately as world-leading ophthalmologists.</p>
+      <div class="app-fact">👁️ AlphaFold enabling 20+ drug candidates in active clinical trials (2024)</div>
+    </div>
+
+    <div class="app-card" style="--cl:#4d9fff">
+      <span class="app-icon">💬</span>
+      <div class="app-name">ChatGPT &amp; Large Language Models</div>
+      <div class="app-cat">OpenAI / Anthropic / Google · NLP</div>
+      <p class="app-desc">GPT-4, Claude, and Gemini represent the frontier of language AI. GPT-4 passes the bar exam (90th percentile), USMLE medical exam, and GRE. Claude processes 200K token context windows. These are transformer-based learning agents with RLHF fine-tuning.</p>
+      <div class="app-fact">📈 ChatGPT: 100M users in 60 days — fastest product adoption in history</div>
+    </div>
+
+    <div class="app-card" style="--cl:#ff5f6d">
+      <span class="app-icon">🎵</span>
+      <div class="app-name">AI in Creative Arts</div>
+      <div class="app-cat">Midjourney / Suno / Runway · Generative AI</div>
+      <p class="app-desc">DALL-E 3, Midjourney, and Stable Diffusion generate photorealistic images from text prompts using diffusion models. Suno AI composes full songs from text descriptions. Runway Gen-3 produces cinematic video. AI won the Colorado State Fair art competition (2022).</p>
+      <div class="app-fact">🎨 Diffusion models reverse Gaussian noise to generate images — trained on LAION-5B</div>
+    </div>
+
+    <div class="app-card" style="--cl:#ffc947">
+      <span class="app-icon">🌤️</span>
+      <div class="app-name">Weather &amp; Climate Prediction</div>
+      <div class="app-cat">Google DeepMind / ECMWF · Environmental AI</div>
+      <p class="app-desc">Google's GraphCast produces 10-day global weather forecasts in under 60 seconds — faster and often more accurate than traditional numerical weather prediction (NWP) systems. DeepMind's model predicted Hurricane Lee's path 9 days ahead.</p>
+      <div class="app-fact">⚡ 60-second forecast vs traditional 6-hour compute time. Runs on single TPU.</div>
+    </div>
+
+    <div class="app-card" style="--cl:#00d4ff">
+      <span class="app-icon">🛡️</span>
+      <div class="app-name">Cybersecurity &amp; Fraud Detection</div>
+      <div class="app-cat">Various · Security AI</div>
+      <p class="app-desc">Visa and Mastercard use ML models processing millions of transactions per second to detect fraud with <0.1% false positive rate. CrowdStrike's Falcon AI detects zero-day malware by behaviour (not signatures). GPT-4 finds vulnerabilities in code.</p>
+      <div class="app-fact">💳 Visa ML: prevents ~$25B in fraud annually. Decision in &lt;100ms per transaction</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+  8 — AI SEARCH
+══════════════════════════════ -->
+<div id="p-search" class="panel">
+<div class="wrap">
+  <div class="sec">
+    <div class="tag">Chapter 8 — Search Algorithms</div>
+    <h2>AI Search — Finding Optimal Solutions</h2>
+    <p>Search is the backbone of AI problem-solving. Given a problem (state space, actions, goal), a search algorithm finds the sequence of actions leading from initial state to goal state. From simple BFS to superhuman Minimax — search powers chess engines, GPS, and game AI.</p>
+  </div>
+
+  <!-- Search comparison -->
+  <div class="box">
+    <div class="box-title"><div class="pip"></div>UNINFORMED SEARCH — BFS vs DFS vs UCS</div>
+    <svg viewBox="0 0 860 280" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="sg"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <marker id="sga" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10z" fill="#00d4ff" opacity=".7"/>
+        </marker>
+      </defs>
+      <rect width="860" height="280" fill="#040f1f"/>
+      <line x1="290" y1="0" x2="290" y2="280" stroke="var(--border)" stroke-width="1"/>
+      <line x1="576" y1="0" x2="576" y2="280" stroke="var(--border)" stroke-width="1"/>
+
+      <!-- BFS Tree -->
+      <text x="145" y="20" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d4ff" letter-spacing="2">BFS — Breadth First</text>
+      <text x="145" y="33" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">Explores level by level</text>
+      <!-- Tree nodes -->
+      <!-- Level 0 -->
+      <circle cx="145" cy="60" r="16" fill="rgba(0,212,255,.15)" stroke="#00d4ff" stroke-width="2" filter="url(#sg)"/>
+      <text x="145" y="65" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#00d4ff">S</text>
+      <!-- Level 1 -->
+      <line x1="133" y1="76" x2="85" y2="110" stroke="rgba(0,212,255,.4)" stroke-width="1.2"/>
+      <line x1="157" y1="76" x2="205" y2="110" stroke="rgba(0,212,255,.4)" stroke-width="1.2"/>
+      <circle cx="80" cy="122" r="13" fill="rgba(0,212,255,.1)" stroke="#00d4ff" stroke-width="1.5"/>
+      <text x="80" y="126" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d4ff">A</text>
+      <circle cx="210" cy="122" r="13" fill="rgba(0,212,255,.1)" stroke="#00d4ff" stroke-width="1.5"/>
+      <text x="210" y="126" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d4ff">B</text>
+      <!-- Level 2 -->
+      <line x1="68" y1="135" x2="45" y2="170" stroke="rgba(0,212,255,.4)" stroke-width="1.2"/>
+      <line x1="92" y1="135" x2="115" y2="170" stroke="rgba(0,212,255,.4)" stroke-width="1.2"/>
+      <line x1="198" y1="135" x2="175" y2="170" stroke="rgba(0,212,255,.4)" stroke-width="1.2"/>
+      <line x1="222" y1="135" x2="245" y2="170" stroke="rgba(0,212,255,.4)" stroke-width="1.2"/>
+      <circle cx="40" cy="182" r="12" fill="rgba(0,212,255,.08)" stroke="rgba(0,212,255,.5)" stroke-width="1"/>
+      <text x="40" y="186" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00a8cc">C</text>
+      <circle cx="115" cy="182" r="12" fill="rgba(0,212,255,.08)" stroke="rgba(0,212,255,.5)" stroke-width="1"/>
+      <text x="115" y="186" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00a8cc">D</text>
+      <circle cx="175" cy="182" r="12" fill="rgba(0,212,255,.08)" stroke="rgba(0,212,255,.5)" stroke-width="1"/>
+      <text x="175" y="186" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00a8cc">E</text>
+      <circle cx="250" cy="182" r="14" fill="rgba(0,245,196,.15)" stroke="#00f5c4" stroke-width="2"/>
+      <text x="250" y="186" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00f5c4">G</text>
+      <!-- BFS order annotation -->
+      <text x="145" y="215" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947">ORDER: S→A→B→C→D→E→G</text>
+      <text x="145" y="230" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">✓ COMPLETE · ✓ OPTIMAL</text>
+      <text x="145" y="244" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">Time: O(bᵈ) · Space: O(bᵈ)</text>
+      <text x="145" y="258" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">b=branching factor, d=depth</text>
+
+      <!-- DFS Tree -->
+      <text x="432" y="20" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#b87fff" letter-spacing="2">DFS — Depth First</text>
+      <text x="432" y="33" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">Dives deep on one branch first</text>
+      <circle cx="432" cy="60" r="16" fill="rgba(184,127,255,.12)" stroke="#b87fff" stroke-width="2" filter="url(#sg)"/>
+      <text x="432" y="65" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#b87fff">S</text>
+      <line x1="420" y1="76" x2="372" y2="110" stroke="rgba(184,127,255,.4)" stroke-width="1.2"/>
+      <line x1="444" y1="76" x2="492" y2="110" stroke="rgba(184,127,255,.3)" stroke-width="1" stroke-dasharray="3 3"/>
+      <circle cx="367" cy="122" r="13" fill="rgba(184,127,255,.1)" stroke="#b87fff" stroke-width="1.5"/>
+      <text x="367" y="126" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#b87fff">A</text>
+      <circle cx="497" cy="122" r="13" fill="rgba(184,127,255,.05)" stroke="rgba(184,127,255,.3)" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="497" y="126" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#4a2080">B</text>
+      <line x1="355" y1="135" x2="332" y2="168" stroke="rgba(184,127,255,.4)" stroke-width="1.2"/>
+      <line x1="379" y1="135" x2="402" y2="168" stroke="rgba(184,127,255,.3)" stroke-width="1" stroke-dasharray="3 2"/>
+      <circle cx="327" cy="180" r="12" fill="rgba(184,127,255,.1)" stroke="#b87fff" stroke-width="1.5"/>
+      <text x="327" y="184" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#b87fff">C</text>
+      <circle cx="407" cy="180" r="12" fill="rgba(184,127,255,.04)" stroke="rgba(184,127,255,.2)" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="407" y="184" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#4a2080">D</text>
+      <line x1="327" y1="192" x2="327" y2="210" stroke="rgba(184,127,255,.4)" stroke-width="1.2"/>
+      <circle cx="327" cy="222" r="14" fill="rgba(0,245,196,.12)" stroke="#00f5c4" stroke-width="2"/>
+      <text x="327" y="226" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00f5c4">G</text>
+      <text x="432" y="248" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947">ORDER: S→A→C→G ✓ found!</text>
+      <text x="432" y="263" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">✓ complete · ✗ not optimal</text>
+      <text x="432" y="277" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">Time: O(bᵐ) · Space: O(bm) ← uses less memory</text>
+
+      <!-- A* -->
+      <text x="718" y="20" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#ffc947" letter-spacing="2">A* — Informed Search</text>
+      <text x="718" y="33" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">f(n) = g(n) + h(n) — heuristic guided</text>
+      <circle cx="718" cy="70" r="18" fill="rgba(255,201,71,.12)" stroke="#ffc947" stroke-width="2" filter="url(#sg)"/>
+      <text x="718" y="67" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947">S</text>
+      <text x="718" y="78" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b5000">f=8</text>
+      <line x1="704" y1="88" x2="660" y2="122" stroke="rgba(255,201,71,.5)" stroke-width="1.5"/>
+      <line x1="732" y1="88" x2="776" y2="122" stroke="rgba(255,201,71,.3)" stroke-width="1" stroke-dasharray="4 3"/>
+      <circle cx="655" cy="134" r="16" fill="rgba(255,201,71,.1)" stroke="#ffc947" stroke-width="1.8"/>
+      <text x="655" y="131" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947">A</text>
+      <text x="655" y="142" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b5000">f=5</text>
+      <circle cx="781" cy="134" r="16" fill="rgba(255,201,71,.06)" stroke="rgba(255,201,71,.3)" stroke-width="1"/>
+      <text x="781" y="131" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b5000">B</text>
+      <text x="781" y="142" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b5000">f=9</text>
+      <!-- A chooses A (lower f) -->
+      <line x1="655" y1="150" x2="655" y2="180" stroke="rgba(255,201,71,.5)" stroke-width="1.5"/>
+      <circle cx="655" cy="192" r="16" fill="rgba(0,245,196,.12)" stroke="#00f5c4" stroke-width="2"/>
+      <text x="655" y="189" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00f5c4">G</text>
+      <text x="655" y="200" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#00a88c">f=0</text>
+      <text x="718" y="228" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947">Picks lowest f(n)=g+h at each step</text>
+      <text x="718" y="243" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">g(n)=cost so far, h(n)=heuristic estimate</text>
+      <text x="718" y="258" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">✓ COMPLETE · ✓ OPTIMAL (if h admissible)</text>
+      <text x="718" y="273" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00f5c4">★ Best practical search algorithm</text>
+    </svg>
+  </div>
+
+  <!-- Minimax -->
+  <div class="box">
+    <div class="box-title"><div class="pip"></div>MINIMAX + ALPHA-BETA PRUNING — THE GAME TREE ALGORITHM</div>
+    <svg viewBox="0 0 860 280" xmlns="http://www.w3.org/2000/svg">
+      <rect width="860" height="280" fill="#040f1f"/>
+      <defs>
+        <marker id="mma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="#00f5c4" opacity=".7"/></marker>
+        <filter id="mmg"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+
+      <!-- MAX layer -->
+      <text x="50" y="22" font-family="JetBrains Mono,monospace" font-size="9" fill="#00f5c4">MAX (AI)</text>
+      <text x="50" y="110" font-family="JetBrains Mono,monospace" font-size="9" fill="#ff5f6d">MIN (Opponent)</text>
+      <text x="50" y="210" font-family="JetBrains Mono,monospace" font-size="9" fill="#00f5c4">LEAF VALUES</text>
+
+      <!-- Root MAX node -->
+      <circle cx="430" cy="40" r="22" fill="rgba(0,245,196,.1)" stroke="#00f5c4" stroke-width="2" filter="url(#mmg)"/>
+      <text x="430" y="37" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#00f5c4">MAX</text>
+      <text x="430" y="50" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00f5c4">3</text>
+
+      <!-- MIN nodes (level 2) -->
+      <line x1="414" y1="62" x2="250" y2="110" stroke="rgba(0,245,196,.3)" stroke-width="1.3"/>
+      <line x1="430" y1="62" x2="430" y2="110" stroke="rgba(0,245,196,.3)" stroke-width="1.3"/>
+      <line x1="446" y1="62" x2="610" y2="110" stroke="rgba(0,245,196,.3)" stroke-width="1.3"/>
+
+      <circle cx="250" cy="125" r="18" fill="rgba(255,95,109,.08)" stroke="#ff5f6d" stroke-width="1.8"/>
+      <text x="250" y="122" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#ff5f6d">MIN</text>
+      <text x="250" y="134" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#ff5f6d">3</text>
+
+      <circle cx="430" cy="125" r="18" fill="rgba(255,95,109,.08)" stroke="#ff5f6d" stroke-width="1.8"/>
+      <text x="430" y="122" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#ff5f6d">MIN</text>
+      <text x="430" y="134" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#ff5f6d">2</text>
+
+      <!-- PRUNED node -->
+      <circle cx="610" cy="125" r="18" fill="rgba(255,95,109,.04)" stroke="rgba(255,95,109,.3)" stroke-width="1.3" stroke-dasharray="4 3"/>
+      <text x="610" y="119" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b1a20">MIN</text>
+      <text x="610" y="131" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b1a20">≤3</text>
+      <text x="610" y="145" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#ff5f6d">PRUNED ✂</text>
+
+      <!-- Leaf nodes - Left branch (MIN node 1) -->
+      <line x1="237" y1="143" x2="175" y2="200" stroke="rgba(255,95,109,.3)" stroke-width="1.2"/>
+      <line x1="250" y1="143" x2="250" y2="200" stroke="rgba(255,95,109,.3)" stroke-width="1.2"/>
+      <line x1="263" y1="143" x2="325" y2="200" stroke="rgba(255,95,109,.3)" stroke-width="1.2"/>
+
+      <circle cx="175" cy="215" r="16" fill="rgba(0,0,0,.5)" stroke="var(--border)" stroke-width="1.2"/>
+      <text x="175" y="219" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#ffc947">3</text>
+      <circle cx="250" cy="215" r="16" fill="rgba(0,0,0,.5)" stroke="var(--border)" stroke-width="1.2"/>
+      <text x="250" y="219" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#ffc947">5</text>
+      <circle cx="325" cy="215" r="16" fill="rgba(0,0,0,.5)" stroke="var(--border)" stroke-width="1.2"/>
+      <text x="325" y="219" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#ffc947">2</text>
+
+      <!-- Leaf nodes - Middle branch (MIN node 2) -->
+      <line x1="418" y1="143" x2="385" y2="200" stroke="rgba(255,95,109,.3)" stroke-width="1.2"/>
+      <line x1="442" y1="143" x2="475" y2="200" stroke="rgba(255,95,109,.3)" stroke-width="1.2"/>
+
+      <circle cx="385" cy="215" r="16" fill="rgba(0,0,0,.5)" stroke="var(--border)" stroke-width="1.2"/>
+      <text x="385" y="219" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#ffc947">9</text>
+      <circle cx="475" cy="215" r="16" fill="rgba(0,0,0,.5)" stroke="var(--border)" stroke-width="1.2"/>
+      <text x="475" y="219" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#ffc947">2</text>
+
+      <!-- Pruned branch -->
+      <line x1="595" y1="143" x2="565" y2="200" stroke="rgba(255,95,109,.15)" stroke-width="1" stroke-dasharray="3 3"/>
+      <line x1="625" y1="143" x2="655" y2="200" stroke="rgba(255,95,109,.15)" stroke-width="1" stroke-dasharray="3 3"/>
+      <circle cx="565" cy="215" r="16" fill="rgba(0,0,0,.3)" stroke="rgba(255,95,109,.2)" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="565" y="219" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#331111">?</text>
+      <circle cx="655" cy="215" r="16" fill="rgba(0,0,0,.3)" stroke="rgba(255,95,109,.2)" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="655" y="219" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#331111">?</text>
+
+      <!-- Annotations -->
+      <rect x="680" y="40" width="170" height="200" rx="4" fill="rgba(0,0,0,.4)"/>
+      <text x="765" y="60" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00f5c4" letter-spacing="1">MINIMAX</text>
+      <text x="690" y="80" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">MAX: picks highest</text>
+      <text x="690" y="94" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">MIN: picks lowest</text>
+      <text x="690" y="108" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">Assumes optimal play</text>
+      <text x="690" y="132" font-family="JetBrains Mono,monospace" font-size="8" fill="#ffc947" letter-spacing="1">α-β PRUNING</text>
+      <text x="690" y="150" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">Skip branches that</text>
+      <text x="690" y="164" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">can't affect result.</text>
+      <text x="690" y="178" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">α = best MAX so far</text>
+      <text x="690" y="192" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#1a3a5c">β = best MIN so far</text>
+      <text x="690" y="210" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#ff5f6d">Cuts O(bᵈ)→O(b^d/2)</text>
+      <text x="690" y="225" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#ff5f6d">Deep Blue searched</text>
+      <text x="690" y="239" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#ff5f6d">12+ plies ahead</text>
+    </svg>
+  </div>
+
+  <div class="three-col">
+    <div class="card" style="--cl:var(--cyan)"><h4>Search Algorithms Summary</h4>
+      <p><code>BFS</code>: Optimal, high memory. Finds shortest path<br>
+      <code>DFS</code>: Low memory, not optimal. Can get lost<br>
+      <code>UCS</code>: Optimal with varied costs. Dijkstra's algorithm<br>
+      <code>IDDFS</code>: DFS memory + BFS completeness<br>
+      <code>A*</code>: Optimal informed search. Uses heuristic h(n)</p>
+    </div>
+    <div class="card" style="--cl:var(--gold)"><h4>A* Heuristics in Practice</h4>
+      <p>The heuristic h(n) must be <code>admissible</code> (never overestimates). Examples:<br>
+      GPS navigation: straight-line distance<br>
+      8-puzzle: Manhattan distance<br>
+      Chess: material + position score<br>
+      If h=0: becomes UCS. If h=exact: perfect. Key: h must be fast to compute.</p>
+    </div>
+    <div class="card" style="--cl:var(--teal)"><h4>MCTS — Monte Carlo Tree Search</h4>
+      <p>Used by AlphaGo. Instead of evaluating all branches, MCTS plays random simulations (rollouts) from each node to estimate value. Four phases: <code>Selection → Expansion → Simulation → Backpropagation</code>. UCB formula balances exploration vs exploitation.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+  9 — ETHICS & FUTURE
+══════════════════════════════ -->
+<div id="p-ethics" class="panel">
+<div class="wrap">
+  <div class="sec">
+    <div class="tag">Chapter 9 — Ethics &amp; Future</div>
+    <h2>AI Ethics, Safety &amp; The Road Ahead</h2>
+    <p>As AI grows more capable, the questions it raises become more urgent. Bias, privacy, job displacement, autonomous weapons, and existential risk are no longer science fiction — they are engineering challenges we must solve before deploying increasingly powerful systems.</p>
+  </div>
+
+  <div class="two-col">
+  <div>
+  <div class="box">
+    <div class="box-title"><div class="pip"></div>KEY ETHICAL CHALLENGES IN AI</div>
+    <svg viewBox="0 0 620 400" xmlns="http://www.w3.org/2000/svg">
+      <rect width="620" height="400" fill="#040f1f"/>
+
+      <g font-family="JetBrains Mono,monospace">
+        <!-- Bias & Fairness -->
+        <rect x="15" y="15" width="280" height="90" rx="4" fill="rgba(255,95,109,.04)" stroke="rgba(255,95,109,.3)" stroke-width="1.3"/>
+        <text x="25" y="36" font-size="11" fill="#ff5f6d">⚖️ BIAS &amp; FAIRNESS</text>
+        <text x="25" y="54" font-size="7.5" fill="#6b1a20">Training data reflects historical biases.</text>
+        <text x="25" y="68" font-size="7.5" fill="#6b1a20">COMPAS recidivism AI: 2× false positive</text>
+        <text x="25" y="82" font-size="7.5" fill="#6b1a20">rate for Black defendants vs White.</text>
+        <text x="25" y="96" font-size="7.5" fill="#ff5f6d">Solution: diverse data, fairness metrics, audits</text>
+
+        <!-- Privacy -->
+        <rect x="310" y="15" width="295" height="90" rx="4" fill="rgba(255,201,71,.04)" stroke="rgba(255,201,71,.3)" stroke-width="1.3"/>
+        <text x="320" y="36" font-size="11" fill="#ffc947">🔒 PRIVACY</text>
+        <text x="320" y="54" font-size="7.5" fill="#6b5000">Facial recognition deployed without consent.</text>
+        <text x="320" y="68" font-size="7.5" fill="#6b5000">LLMs memorise training data. GDPR "right</text>
+        <text x="320" y="82" font-size="7.5" fill="#6b5000">to be forgotten" conflicts with model weights.</text>
+        <text x="320" y="96" font-size="7.5" fill="#ffc947">Solution: differential privacy, federated learning</text>
+
+        <!-- Job displacement -->
+        <rect x="15" y="120" width="280" height="90" rx="4" fill="rgba(0,212,255,.04)" stroke="rgba(0,212,255,.25)" stroke-width="1.3"/>
+        <text x="25" y="141" font-size="11" fill="#00d4ff">🏭 JOB DISPLACEMENT</text>
+        <text x="25" y="159" font-size="7.5" fill="#0d4060">McKinsey: 400M–800M jobs automatable</text>
+        <text x="25" y="173" font-size="7.5" fill="#0d4060">by 2030. Radiologists, drivers, paralegals</text>
+        <text x="25" y="187" font-size="7.5" fill="#0d4060">and coders at risk. New jobs also created.</text>
+        <text x="25" y="201" font-size="7.5" fill="#00d4ff">Solution: UBI research, retraining programs</text>
+
+        <!-- Autonomous Weapons -->
+        <rect x="310" y="120" width="295" height="90" rx="4" fill="rgba(255,95,109,.04)" stroke="rgba(255,95,109,.25)" stroke-width="1.3"/>
+        <text x="320" y="141" font-size="11" fill="#ff5f6d">⚔️ AUTONOMOUS WEAPONS</text>
+        <text x="320" y="159" font-size="7.5" fill="#6b1a20">Lethal Autonomous Weapons Systems (LAWS)</text>
+        <text x="320" y="173" font-size="7.5" fill="#6b1a20">can select &amp; kill targets without human</text>
+        <text x="320" y="187" font-size="7.5" fill="#6b1a20">override. "Killer robots" — UN debate ongoing.</text>
+        <text x="320" y="201" font-size="7.5" fill="#ff5f6d">Solution: International treaty — "Geneva for AI"</text>
+
+        <!-- Existential Risk -->
+        <rect x="15" y="225" width="280" height="90" rx="4" fill="rgba(184,127,255,.04)" stroke="rgba(184,127,255,.3)" stroke-width="1.5"/>
+        <text x="25" y="246" font-size="11" fill="#b87fff">🌐 EXISTENTIAL RISK</text>
+        <text x="25" y="264" font-size="7.5" fill="#4a2080">Misaligned superintelligent AI pursuing</text>
+        <text x="25" y="278" font-size="7.5" fill="#4a2080">wrong goals could be catastrophic.</text>
+        <text x="25" y="292" font-size="7.5" fill="#4a2080">Hinton, Bengio, Hawking, Musk concerned.</text>
+        <text x="25" y="306" font-size="7.5" fill="#b87fff">Solution: AI alignment research, interpretability</text>
+
+        <!-- Deepfakes -->
+        <rect x="310" y="225" width="295" height="90" rx="4" fill="rgba(0,245,196,.04)" stroke="rgba(0,245,196,.25)" stroke-width="1.3"/>
+        <text x="320" y="246" font-size="11" fill="#00f5c4">🎭 DEEPFAKES &amp; MISINFORMATION</text>
+        <text x="320" y="264" font-size="7.5" fill="#003d30">AI-generated synthetic media is indistinguishable</text>
+        <text x="320" y="278" font-size="7.5" fill="#003d30">from real. Threatens elections, journalism,</text>
+        <text x="320" y="292" font-size="7.5" fill="#003d30">evidence in courts. 500K deepfake videos (2023).</text>
+        <text x="320" y="306" font-size="7.5" fill="#00f5c4">Solution: digital watermarking, C2PA standard</text>
+
+        <!-- AI Principles -->
+        <rect x="15" y="330" width="590" height="58" rx="4" fill="rgba(0,212,255,.03)" stroke="rgba(0,212,255,.2)" stroke-width="1"/>
+        <text x="310" y="350" text-anchor="middle" font-size="9" fill="#00a8cc" letter-spacing="2">RESPONSIBLE AI PRINCIPLES (EU AI Act · Asilomar · Montreal Declaration)</text>
+        <text x="40" y="368" font-size="7.5" fill="#1a3a5c">Transparency · Accountability · Fairness · Privacy · Human oversight · Beneficence · Non-maleficence · Justice</text>
+        <text x="40" y="382" font-size="7.5" fill="#1a3a5c">EU AI Act (2024): First binding AI law. Bans social scoring, most real-time biometrics, subliminal manipulation.</text>
+      </g>
+    </svg>
+  </div>
+  </div>
+
+  <div class="card-stack">
+    <div class="card" style="--cl:var(--gold)">
+      <h4>The Alignment Problem</h4>
+      <p>How do we ensure AI systems do what we <em>actually</em> want? Specifying objectives is harder than it sounds — "maximise paperclips" leads to converting all matter to paperclips (Bostrom's paperclip maximiser). AI safety researchers work on reward modelling, RLHF, constitutional AI, and interpretability.</p>
+    </div>
+    <div class="card" style="--cl:var(--violet)">
+      <h4>Interpretability (XAI)</h4>
+      <p>Deep neural networks are "black boxes." Explainable AI (XAI) techniques try to understand what a model is doing: LIME (local approximations), SHAP (Shapley values), attention visualisation, mechanistic interpretability. Critical for medical and legal deployments where decisions must be justified.</p>
+    </div>
+    <div class="card" style="--cl:var(--teal)">
+      <h4>The Future — What's Next?</h4>
+      <p>Near-term: multimodal AI (text+image+video+audio), agentic AI systems, AI in drug discovery and materials science. Mid-term: AGI debate intensifies, AI co-pilots everywhere. Long-term: potential AGI/ASI raises questions humanity has never had to answer before.</p>
+    </div>
+    <div class="card" style="--cl:var(--cyan)">
+      <h4>AI Governance &amp; Regulation</h4>
+      <p>EU AI Act (2024): First binding AI law. US Executive Order on AI (2023): safety requirements for frontier models. UK AI Safety Institute: evaluates dangerous capabilities. China: generative AI regulations. The race between AI capability and governance is one of the defining challenges of our era.</p>
+    </div>
+    <div class="card" style="--cl:var(--red)">
+      <h4>The Singularity Hypothesis</h4>
+      <p>Ray Kurzweil predicts by 2045, AI will surpass all human intelligence combined — the "Singularity." At that point, AI could improve itself recursively at exponential speed. Whether this is possible, beneficial, or existentially dangerous is hotly debated among researchers and philosophers.</p>
+    </div>
+    <div class="card" style="--cl:var(--blue)">
+      <h4>AI &amp; Scientific Discovery</h4>
+      <p>AI is accelerating science itself: AlphaFold revolutionised biology, GNoME discovered 2.2M new crystal structures, GraphCast transforms meteorology. AI may soon propose its own hypotheses, design its own experiments, and publish in journals — a new kind of scientific collaborator.</p>
+    </div>
+  </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ── Neural network canvas background ──
+const canvas = document.getElementById('neural-bg');
+const ctx = canvas.getContext('2d');
+let W, H, nodes = [], edges = [], t = 0;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  nodes = [];
+  for (let i = 0; i < 55; i++) {
+    nodes.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.25,
+      r: Math.random() * 2.5 + 1
+    });
+  }
+}
+
+function drawNeural() {
+  ctx.clearRect(0, 0, W, H);
+  t += 0.005;
+
+  nodes.forEach(n => {
+    n.x += n.vx;
+    n.y += n.vy;
+    if (n.x < 0 || n.x > W) n.vx *= -1;
+    if (n.y < 0 || n.y > H) n.vy *= -1;
+  });
+
+  // Draw connections
+  nodes.forEach((a, i) => {
+    nodes.slice(i + 1).forEach(b => {
+      const dx = a.x - b.x, dy = a.y - b.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 160) {
+        const alpha = (1 - dist / 160) * 0.35;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = `rgba(0,212,255,${alpha})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    });
+  });
+
+  // Draw nodes
+  nodes.forEach((n, i) => {
+    const pulse = Math.sin(t * 2 + i) * 0.5 + 0.5;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(0,212,255,${0.3 + pulse * 0.5})`;
+    ctx.fill();
+  });
+
+  requestAnimationFrame(drawNeural);
+}
+
+resize();
+window.addEventListener('resize', resize);
+drawNeural();
+
+// ── Tab navigation ──
+function go(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  document.getElementById('p-' + name).classList.add('on');
+  btn.classList.add('on');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
